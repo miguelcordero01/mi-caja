@@ -11,7 +11,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f7;color:#1d1d1f;min-height:100vh;padding-bottom:80px;}
 .topbar{background:#fff;border-bottom:0.5px solid rgba(0,0,0,0.12);padding:14px 16px 10px;position:sticky;top:0;z-index:10;}
-.topbar h1{font-size:18px;font-weight:600;color:#1d1d1f;}
+.topbar h1{font-size:18px;font-weight:600;}
 .topbar .sub{font-size:12px;color:#888;margin-top:1px;}
 .bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:0.5px solid rgba(0,0,0,0.12);display:flex;padding:8px 0 20px;z-index:10;}
 .bnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:4px;}
@@ -24,7 +24,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
 .mt{background:#f5f5f7;border-radius:10px;padding:10px 12px;}
 .ml{font-size:11px;color:#888;margin-bottom:2px;}
-.mv{font-size:18px;font-weight:600;}
+.mv{font-size:16px;font-weight:600;}
 .green{color:#34C759;}.red{color:#FF3B30;}.blue{color:#007AFF;}.purple{color:#5856D6;}.orange{color:#FF9500;}
 .field{margin-bottom:10px;}
 .field label{font-size:12px;color:#888;display:block;margin-bottom:4px;font-weight:500;}
@@ -68,8 +68,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tw{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid #f0f0f0;}
 .tw:last-child{border-bottom:none;}
 .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
-.hint{font-size:11px;color:#888;text-align:center;margin-top:6px;line-height:1.5;}
-.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:flex-end;justify-content:center;padding:0;}
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
 .modal-sheet{background:#fff;border-radius:16px 16px 0 0;padding:20px 16px 40px;width:100%;max-width:480px;}
 .modal-handle{width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 16px;}
 .modal-title{font-size:17px;font-weight:600;color:#1d1d1f;margin-bottom:14px;}
@@ -78,40 +77,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mc{background:#f5f5f7;color:#1d1d1f;}
 .ms{background:#007AFF;color:#fff;}
 .md2{background:#fff0f0;color:#FF3B30;}
+.hint{font-size:11px;color:#888;text-align:center;margin-top:6px;line-height:1.5;}
+.info-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:0.5px solid #f0f0f0;}
+.info-row:last-child{border-bottom:none;}
+.info-lbl{color:#888;}
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
 </head>
 <body>
-
 <div class="topbar">
   <h1>💼 Mi Caja</h1>
   <div class="sub" id="fh"></div>
 </div>
-
 <div id="s-res" class="sc on"></div>
 <div id="s-trab" class="sc"></div>
 <div id="s-fijos" class="sc"></div>
 <div id="s-new" class="sc"></div>
 <div id="s-det" class="sc"></div>
 <div id="modal"></div>
-
 <nav class="bottomnav">
   <button class="bnb on" onclick="go('res')"><span class="bni">📊</span><span class="bnl">Inicio</span></button>
   <button class="bnb" onclick="go('trab')"><span class="bni">💼</span><span class="bnl">Trabajos</span></button>
   <button class="bnb" onclick="go('fijos')"><span class="bni">🏠</span><span class="bnl">Fijos</span></button>
   <button class="bnb" onclick="go('new')"><span class="bni">➕</span><span class="bnl">Nuevo</span></button>
 </nav>
-
 <script>
-var DB='micaja_v1';
+var DB='micaja_v2';
 var DATA=JSON.parse(localStorage.getItem(DB)||'{"tj":[],"fijos":[]}');
 if(!DATA.tj)DATA.tj=[];if(!DATA.fijos)DATA.fijos=[];
 var TJ=DATA.tj,FJ=DATA.fijos;
 var AC=null,MT='adelanto',NW=[];
 var hoy=new Date();
 var dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-var mes=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-document.getElementById('fh').textContent=dias[hoy.getDay()]+' '+hoy.getDate()+' '+mes[hoy.getMonth()]+' '+hoy.getFullYear();
+var meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+document.getElementById('fh').textContent=dias[hoy.getDay()]+' '+hoy.getDate()+' '+meses[hoy.getMonth()]+' '+hoy.getFullYear();
 var CATS_NEG=['Agua','Luz','Gas','Internet','Alquiler local','Otro negocio'];
 var CATS_PERS=['Alquiler cuarto','Seguro salud','SOAT','Otro personal'];
 
@@ -120,6 +118,9 @@ function fm(n){return 'S/'+Math.abs(n).toFixed(2);}
 function fs(n){return 'S/'+Math.abs(Math.round(n));}
 function ini(n){var p=n.trim().split(' ');return(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase();}
 function cm(){document.getElementById('modal').innerHTML='';}
+function fechaHoy(){var h=new Date();return h.getDate()+'/'+(h.getMonth()+1)+'/'+h.getFullYear();}
+function horaAhora(){var h=new Date();return h.getHours().toString().padStart(2,'0')+':'+h.getMinutes().toString().padStart(2,'0');}
+function fechaHora(){return fechaHoy()+' '+horaAhora();}
 
 function calc(t){
   var a=0,i2=0,o=0,gp={},pg={},gf=0;
@@ -137,7 +138,8 @@ function calc(t){
   var pp={};
   ws.forEach(function(w){var d=w.tp==='pct'?(disp*(w.v/100)):w.v;pp[w.id]=Math.max(0,d-(pg[w.id]||0));});
   var mw=ws.find(function(w){return w.id==='yo';})||ws[0];
-  return{a,i2,cob,o,gp,pg,pp,gf,disp,mp:mw.tp==='pct'?(disp*(mw.v/100)):mw.v,pc:(t.total||0)-cob};
+  var mp=mw.tp==='pct'?(disp*(mw.v/100)):mw.v;
+  return{a,i2,cob,o,gp,pg,pp,gf,disp,mp,pc:t.total>0?(t.total-cob):0};
 }
 
 function br(lbl,val,mx,col,tc){
@@ -179,7 +181,8 @@ function rRes(){
     html+='<div class="card"><div class="ch">Trabajos recientes</div>'+
       TJ.slice(0,5).map(function(t){var c=calc(t);
         return '<div class="mr" onclick="det('+t.id+')" style="cursor:pointer;">'+
-          '<div class="mf"><div class="md">'+t.n+'<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+( t.est==='activo'?'Activo':'Cerrado')+'</span></div><div class="mm">'+t.f+'</div></div>'+
+          '<div class="mf"><div class="md">'+t.n+'<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+( t.est==='activo'?'Activo':'Cerrado')+'</span></div>'+
+          '<div class="mm">Inicio: '+t.f+'</div></div>'+
           '<div class="ma" style="color:#5856D6;">'+fm(c.mp)+'</div></div>';
       }).join('')+'</div>';
   }
@@ -194,7 +197,7 @@ function rList(){
     return '<div class="mr" onclick="det('+t.id+')" style="cursor:pointer;">'+
       '<div style="width:34px;height:34px;border-radius:10px;background:#e8f0ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">💼</div>'+
       '<div class="mf"><div class="md">'+t.n+'<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+( t.est==='activo'?'Activo':'Cerrado')+'</span></div>'+
-      '<div class="mm">'+t.f+' · '+(t.ws||[]).map(function(w){return w.n;}).join(', ')+'</div></div>'+
+      '<div class="mm">'+t.f+(t.fcierre?' → '+t.fcierre:'')+' · '+(t.ws||[]).map(function(w){return w.n;}).join(', ')+'</div></div>'+
       '<div class="ma" style="color:#5856D6;">'+fm(c.mp)+'</div></div>';
   }).join('')+'</div>';
 }
@@ -204,9 +207,14 @@ function rNew(){
   document.getElementById('s-new').innerHTML=
     '<div class="card"><div class="ch">Datos del trabajo</div>'+
     '<div class="field"><label>Nombre del trabajo</label><input id="nn" placeholder="Ej: Instalación eléctrica" autocomplete="off"/></div>'+
-    '<div class="field"><label>Total acordado (S/)</label><input id="nt" type="number" placeholder="1500" inputmode="decimal"/></div></div>'+
-    '<div class="card"><div class="ch">Trabajadores</div>'+
-    '<div style="font-size:13px;color:#888;margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid #f0f0f0;">✅ Tú siempre estás incluido</div>'+
+    '<div class="field"><label>Total acordado (S/) — opcional</label><input id="nt" type="number" placeholder="0" inputmode="decimal"/></div>'+
+    '</div>'+
+    '<div class="card"><div class="ch">Tu pago</div>'+
+    '<div class="r2"><div class="field"><label>Tipo de pago</label><select id="yo-tp"><option value="pct">% de ganancia</option><option value="fijo">Monto fijo (S/)</option></select></div>'+
+    '<div class="field"><label id="yo-vl">Tu % de ganancia</label><input id="yo-v" type="number" placeholder="100" inputmode="decimal"/></div></div>'+
+    '</div>'+
+    '<div class="card"><div class="ch">Otros trabajadores</div>'+
+    '<div style="font-size:12px;color:#888;margin-bottom:10px;">Agrega a tu papá, ayudantes, etc.</div>'+
     '<div id="ew"></div>'+
     '<div class="r2"><div class="field"><label>Nombre</label><input id="wn" placeholder="Papá" autocomplete="off"/></div>'+
     '<div class="field"><label>Tipo de pago</label><select id="wt"><option value="pct">% ganancia</option><option value="fijo">Monto fijo</option></select></div></div>'+
@@ -216,6 +224,10 @@ function rNew(){
   document.getElementById('wt').onchange=function(){
     document.getElementById('wvl').textContent=this.value==='pct'?'% que le toca':'Monto fijo (S/)';
     document.getElementById('wv').placeholder=this.value==='pct'?'30':'200';
+  };
+  document.getElementById('yo-tp').onchange=function(){
+    document.getElementById('yo-vl').textContent=this.value==='pct'?'Tu % de ganancia':'Tu monto fijo (S/)';
+    document.getElementById('yo-v').placeholder=this.value==='pct'?'100':'500';
   };
 }
 
@@ -237,8 +249,10 @@ function reW(){
 function crearT(){
   var n=document.getElementById('nn').value.trim();
   if(!n){alert('Escribe el nombre del trabajo');return;}
-  var ws=[{id:'yo',n:'Yo',tp:'pct',v:100}].concat(NW);
-  var t={id:Date.now(),n:n,total:parseFloat(document.getElementById('nt').value)||0,ws:ws,est:'activo',movs:[],f:hoy.getDate()+'/'+(hoy.getMonth()+1)+'/'+hoy.getFullYear()};
+  var yoTp=document.getElementById('yo-tp').value;
+  var yoV=parseFloat(document.getElementById('yo-v').value)||(yoTp==='pct'?100:0);
+  var ws=[{id:'yo',n:'Yo',tp:yoTp,v:yoV}].concat(NW);
+  var t={id:Date.now(),n:n,total:parseFloat(document.getElementById('nt').value)||0,ws:ws,est:'activo',movs:[],f:fechaHoy(),fcierre:null};
   TJ.unshift(t);sv();AC=t;det(t.id);
 }
 
@@ -290,7 +304,7 @@ function addFijo(){
   var m=parseFloat(document.getElementById('fj-m').value);
   if(!m||m<=0){alert('Ingresa un monto');return;}
   var ahora=new Date();
-  FJ.unshift({id:Date.now(),tipo:document.getElementById('fj-tipo').value,cat:document.getElementById('fj-cat').value,desc:document.getElementById('fj-d').value.trim(),m:m,ts:ahora.getTime(),fecha:ahora.getDate()+'/'+(ahora.getMonth()+1)+'/'+ahora.getFullYear()});
+  FJ.unshift({id:Date.now(),tipo:document.getElementById('fj-tipo').value,cat:document.getElementById('fj-cat').value,desc:document.getElementById('fj-d').value.trim(),m:m,ts:ahora.getTime(),fecha:fechaHora()});
   sv();document.getElementById('fj-m').value='';document.getElementById('fj-d').value='';rFijos();
 }
 
@@ -323,8 +337,7 @@ function addM(){
   if(!m||m<=0){alert('Ingresa un monto');return;}
   var cat=document.getElementById('mc').value,desc=document.getElementById('mdesc').value.trim()||cat;
   var pe=document.getElementById('mper');
-  var ahora=new Date(),h=ahora.getHours().toString().padStart(2,'0')+':'+ahora.getMinutes().toString().padStart(2,'0');
-  AC.movs.unshift({id:Date.now(),t:MT,m:m,cat:cat,d:desc,p:pe?pe.value:'yo',h:h});
+  AC.movs.unshift({id:Date.now(),t:MT,m:m,cat:cat,d:desc,p:pe?pe.value:'yo',fh:fechaHora()});
   var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
   sv();document.getElementById('mm').value='';document.getElementById('mdesc').value='';rDet();
 }
@@ -386,13 +399,14 @@ function confCerrar(){
   document.getElementById('modal').innerHTML=
     '<div class="modal-bg" onclick="cm()"><div class="modal-sheet" onclick="event.stopPropagation()">'+
     '<div class="modal-handle"></div><div class="modal-title">¿Cerrar "'+AC.n+'"?</div>'+
-    '<div style="font-size:14px;color:#888;margin-bottom:4px;">Ya no podrás editar movimientos.</div>'+
-    '<div class="modal-actions"><button class="mc" onclick="cm()">Cancelar</button><button class="ms" onclick="cerrarT()">Cerrar</button></div>'+
+    '<div style="font-size:14px;color:#888;margin-bottom:4px;">Se registrará la fecha de cierre. Ya no podrás editar movimientos.</div>'+
+    '<div class="modal-actions"><button class="mc" onclick="cm()">Cancelar</button><button class="ms" onclick="cerrarT()">Cerrar trabajo</button></div>'+
     '</div></div>';
 }
 
 function cerrarT(){
-  AC.est='cerrado';var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
+  AC.est='cerrado';AC.fcierre=fechaHora();
+  var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
   sv();cm();rDet();
 }
 
@@ -401,14 +415,26 @@ function exportCSV(){
   var c=calc(AC),ws=AC.ws||[],rows=[];
   var tipos={adelanto:'Adelanto',ingreso:'Pago final',obra:'Gasto obra',personal:'Gasto personal',pago:'Pago trabajador',fijo:'Gasto fijo'};
   rows.push(['RESUMEN','','','','']);
-  rows.push(['Trabajo',AC.n,'','','']);rows.push(['Fecha',AC.f,'','','']);
-  rows.push(['Total acordado',AC.total,'','','']);rows.push(['Cobrado',c.cob.toFixed(2),'','','']);
-  rows.push(['Gasto obra',c.o.toFixed(2),'','','']);rows.push(['Gastos fijos',c.gf.toFixed(2),'','','']);
-  rows.push(['Disponible',c.disp.toFixed(2),'','','']);rows.push(['Mi parte',c.mp.toFixed(2),'','','']);
-  rows.push(['','','','','']);rows.push(['MOVIMIENTOS','Tipo','Categoría','Persona','Monto']);
+  rows.push(['Trabajo',AC.n,'','','']);
+  rows.push(['Fecha inicio',AC.f,'','','']);
+  rows.push(['Fecha cierre',AC.fcierre||'En curso','','','']);
+  rows.push(['Total acordado',AC.total||'No definido','','','']);
+  rows.push(['Cobrado',c.cob.toFixed(2),'','','']);
+  rows.push(['Gasto obra',c.o.toFixed(2),'','','']);
+  rows.push(['Gastos fijos',c.gf.toFixed(2),'','','']);
+  rows.push(['Disponible',c.disp.toFixed(2),'','','']);
+  rows.push(['Mi parte',c.mp.toFixed(2),'','','']);
+  rows.push(['','','','','']);
+  rows.push(['TRABAJADORES','Tipo pago','Corresponde','Cobró','Falta']);
+  ws.forEach(function(w){
+    var pg=c.pg[w.id]||0,pp=c.pp[w.id]||0,debe=w.tp==='pct'?(c.disp*(w.v/100)):w.v;
+    rows.push([w.n,w.tp==='pct'?(w.v+'%'):('S/'+w.v),debe.toFixed(2),pg.toFixed(2),pp.toFixed(2)]);
+  });
+  rows.push(['','','','','']);
+  rows.push(['MOVIMIENTOS','Tipo','Categoría','Persona','Monto','Fecha y hora']);
   AC.movs.forEach(function(m){
     var wn=(ws.find(function(w){return w.id===m.p;})||{n:''}).n;
-    rows.push([m.d,tipos[m.t]||m.t,m.cat||'',wn,m.m.toFixed(2)]);
+    rows.push([m.d,tipos[m.t]||m.t,m.cat||'',wn,m.m.toFixed(2),m.fh||'']);
   });
   var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
@@ -436,7 +462,8 @@ function rDet(){
     return l.map(function(m){
       var wn='';if(m.t==='personal'||m.t==='pago'){wn=(ws.find(function(w){return w.id===m.p;})||{n:'?'}).n;}
       return '<div class="mr"><div class="mi" style="'+icB[m.t]+'font-size:15px;">'+icE[m.t]+'</div>'+
-        '<div class="mf"><div class="md">'+m.d+'</div><div class="mm">'+(wn?wn+' · ':'')+( m.cat||'')+' · '+m.h+'</div></div>'+
+        '<div class="mf"><div class="md">'+m.d+'</div>'+
+        '<div class="mm">'+(wn?wn+' · ':'')+( m.cat||'')+(m.fh?' · '+m.fh:'')+'</div></div>'+
         '<div class="ma" style="color:'+clrM[m.t]+';">'+sgn[m.t]+fm(m.m)+'</div>'+
         (t.est==='activo'?'<div class="mbtns"><button class="ib" onclick="showEdit('+m.id+')" style="color:#007AFF;">✏️</button><button class="ib" onclick="confDel('+m.id+')" style="color:#FF3B30;">🗑</button></div>':'')+
       '</div>';
@@ -445,21 +472,28 @@ function rDet(){
 
   document.getElementById('s-det').innerHTML=
     '<button class="back" onclick="go(\'trab\')">← Volver</button>'+
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">'+
-      '<div style="font-size:20px;font-weight:700;color:#1d1d1f;">'+t.n+'</div>'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'+
+      '<div style="font-size:20px;font-weight:700;">'+t.n+'</div>'+
       '<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+( t.est==='activo'?'Activo':'Cerrado')+'</span>'+
     '</div>'+
-    '<div style="font-size:12px;color:#888;margin-bottom:14px;">'+t.f+(t.total?' · Total: '+fm(t.total):'')+'</div>'+
+    '<div class="card"><div class="ch">Info del trabajo</div>'+
+      '<div class="info-row"><span class="info-lbl">📅 Inicio</span><span>'+t.f+'</span></div>'+
+      (t.fcierre?'<div class="info-row"><span class="info-lbl">🔒 Cierre</span><span>'+t.fcierre+'</span></div>':'')+
+      (t.total?'<div class="info-row"><span class="info-lbl">💰 Total acordado</span><span>'+fm(t.total)+'</span></div>':'')+
+      '<div class="info-row"><span class="info-lbl">👥 Equipo</span><span>'+(t.ws||[]).map(function(w){return w.n+' ('+(w.tp==='pct'?w.v+'%':'S/'+w.v)+')';}).join(', ')+'</span></div>'+
+    '</div>'+
     '<div class="mg">'+
       '<div class="mt"><div class="ml">Cobrado</div><div class="mv green">'+fm(c.cob)+'</div></div>'+
-      '<div class="mt"><div class="ml">Por cobrar</div><div class="mv '+(c.pc>0?'red':'green')+'">'+fm(c.pc)+'</div></div>'+
+      (t.total?'<div class="mt"><div class="ml">Por cobrar</div><div class="mv '+(c.pc>0?'red':'green')+'">'+fm(c.pc)+'</div></div>':'<div class="mt"><div class="ml">Gasto obra</div><div class="mv red">'+fm(c.o)+'</div></div>')+
       '<div class="mt"><div class="ml">Disponible</div><div class="mv blue">'+fm(c.disp)+'</div></div>'+
       '<div class="mt"><div class="ml">Mi parte</div><div class="mv purple">'+fm(c.mp)+'</div></div>'+
     '</div>'+
     '<div class="card"><div class="ch">Desglose</div>'+
-      br('Cobrado',c.cob,mx,'#34C759','#28a745')+br('Mi parte',c.mp,mx,'#5856D6','#3634A3')+
-      br('Gasto obra',c.o,mx,'#FF3B30','#cc2200')+br('Gasto pers.',tgp,mx,'#FF9500','#cc7700')+
-      br('Gasto fijo',c.gf,mx,'#BA7517','#854F0B')+
+      br('Cobrado',c.cob,mx,'#34C759','#28a745')+
+      br('Mi parte',c.mp,mx,'#5856D6','#3634A3')+
+      br('Gasto obra',c.o,mx,'#FF3B30','#cc2200')+
+      br('Gasto pers.',tgp,mx,'#FF9500','#cc7700')+
+      (c.gf?br('Gasto fijo',c.gf,mx,'#BA7517','#854F0B'):'')+
     '</div>'+
     '<div class="card"><div class="ch">Trabajadores</div>'+
       ws.map(function(w,i){
@@ -467,7 +501,7 @@ function rDet(){
         var gp=c.gp[w.id]||0,pg=c.pg[w.id]||0,pp=c.pp[w.id]||0;
         var debe=w.tp==='pct'?(c.disp*(w.v/100)):w.v;
         return '<div class="tw"><div class="av" style="background:'+bg+';color:'+col+';">'+ini(w.n)+'</div>'+
-          '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#1d1d1f;">'+w.n+' '+(w.tp==='pct'?'('+w.v+'%)':'(fijo)')+'</div>'+
+          '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;">'+w.n+' '+(w.tp==='pct'?'('+w.v+'%)':'(fijo S/'+w.v+')')+'</div>'+
           '<div style="font-size:11px;color:#888;">Gasto: '+fm(gp)+' · Cobró: '+fm(pg)+'</div></div>'+
           '<div style="text-align:right;flex-shrink:0;"><div style="font-size:13px;font-weight:600;color:'+col+';">'+fm(debe)+'</div>'+
           '<div style="font-size:11px;color:'+(pp>0?'#FF3B30':'#34C759')+';">'+(pp>0?'Falta '+fm(pp):'Al día')+'</div></div></div>';
@@ -488,7 +522,7 @@ function rDet(){
       '<div class="field"><label>Monto (S/)</label><input id="mm" type="number" placeholder="0.00" inputmode="decimal"/></div></div>'+
       '<div class="field"><label>Descripción</label><input id="mdesc" placeholder="Ej: pasaje, cemento..." autocomplete="off"/></div>'+
       '<button class="btn bb" onclick="addM()">+ Agregar</button></div>':
-    '<div class="card" style="text-align:center;font-size:14px;color:#888;padding:20px;">🔒 Trabajo cerrado</div>')+
+    '<div class="card" style="text-align:center;font-size:14px;color:#888;padding:20px;">🔒 Trabajo cerrado — solo lectura</div>')+
     '<div class="card"><div class="ch">Movimientos</div>'+
       '<div class="ssep">Ingresos</div>'+mList('adelanto')+mList('ingreso')+
       '<div class="ssep">Gastos de obra</div>'+mList('obra')+
@@ -498,10 +532,9 @@ function rDet(){
     '</div>'+
     '<button class="btn bcsv" onclick="exportCSV()" style="margin-bottom:6px;">📥 Descargar CSV para Google Sheets</button>'+
     '<div class="hint">Descarga → abre con Hojas de cálculo de Google</div>'+
-    (t.est==='activo'?'<button class="btn bk" onclick="confCerrar()" style="margin-bottom:6px;margin-top:8px;">🔒 Cerrar trabajo</button>':'')+
+    (t.est==='activo'?'<button class="btn bk" onclick="confCerrar()" style="margin-bottom:6px;margin-top:10px;">🔒 Cerrar trabajo</button>':'')+
     '<button class="btn br" onclick="confDelT()" style="margin-bottom:30px;margin-top:4px;">🗑 Eliminar trabajo</button>';
 }
-
 rRes();
 </script>
 </body>
