@@ -25,19 +25,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mt{background:#f5f5f7;border-radius:10px;padding:10px 12px;}
 .ml{font-size:11px;color:#888;margin-bottom:2px;}
 .mv{font-size:16px;font-weight:600;}
-.green{color:#34C759;}.red{color:#FF3B30;}.blue{color:#007AFF;}.purple{color:#5856D6;}.orange{color:#FF9500;}
+.green{color:#34C759;}.red{color:#FF3B30;}.blue{color:#007AFF;}.purple{color:#5856D6;}.orange{color:#FF9500;}.teal{color:#0d9488;}
 .field{margin-bottom:10px;}
 .field label{font-size:12px;color:#888;display:block;margin-bottom:4px;font-weight:500;}
 .field input,.field select{width:100%;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid #e0e0e0;background:#f5f5f7;color:#1d1d1f;-webkit-appearance:none;appearance:none;}
 .field input:focus,.field select:focus{outline:none;border-color:#007AFF;background:#fff;}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.btn{width:100%;padding:13px;font-size:15px;font-weight:600;border-radius:12px;border:none;cursor:pointer;margin-top:6px;}
+.btn{width:100%;padding:13px;font-size:15px;font-weight:600;border-radius:12px;border:none;cursor:pointer;margin-top:6px;font-family:inherit;}
 .bg{background:#34C759;color:#fff;}
 .bb{background:#007AFF;color:#fff;}
 .br{background:#fff0f0;color:#FF3B30;}
 .bk{background:#f5f5f7;color:#1d1d1f;}
 .bcsv{background:#34C759;color:#fff;}
 .borange{background:#FF9500;color:#fff;}
+.bteal{background:#0d9488;color:#fff;}
 .back{font-size:14px;color:#007AFF;background:none;border:none;cursor:pointer;padding:0;margin-bottom:12px;display:flex;align-items:center;gap:4px;font-weight:500;}
 .empty{font-size:14px;color:#888;text-align:center;padding:30px 0;}
 .badge{font-size:10px;padding:2px 8px;border-radius:20px;margin-left:6px;font-weight:600;}
@@ -52,7 +53,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mbtns{display:flex;gap:4px;flex-shrink:0;}
 .ib{background:none;border:none;cursor:pointer;font-size:16px;padding:4px;}
 .ttabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
-.tt{flex:1;min-width:48px;padding:7px 4px;font-size:11px;font-weight:600;border-radius:8px;border:1px solid #e0e0e0;background:#f5f5f7;color:#888;cursor:pointer;text-align:center;}
+.tt{flex:1;min-width:48px;padding:7px 4px;font-size:11px;font-weight:600;border-radius:8px;border:1px solid #e0e0e0;background:#f5f5f7;color:#888;cursor:pointer;text-align:center;font-family:inherit;}
 .ta{background:#e8f8ed;color:#34C759;border-color:#34C759;}
 .ti2{background:#f0fff4;color:#28a745;border-color:#28a745;}
 .to{background:#e8f0ff;color:#007AFF;border-color:#007AFF;}
@@ -69,11 +70,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tw:last-child{border-bottom:none;}
 .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
 .modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
-.modal-sheet{background:#fff;border-radius:16px 16px 0 0;padding:20px 16px 40px;width:100%;max-width:480px;}
+.modal-sheet{background:#fff;border-radius:16px 16px 0 0;padding:20px 16px 40px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
 .modal-handle{width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 16px;}
 .modal-title{font-size:17px;font-weight:600;color:#1d1d1f;margin-bottom:14px;}
 .modal-actions{display:flex;gap:10px;margin-top:14px;}
-.modal-actions button{flex:1;padding:13px;font-size:15px;font-weight:600;border-radius:12px;border:none;cursor:pointer;}
+.modal-actions button{flex:1;padding:13px;font-size:15px;font-weight:600;border-radius:12px;border:none;cursor:pointer;font-family:inherit;}
 .mc{background:#f5f5f7;color:#1d1d1f;}
 .ms{background:#007AFF;color:#fff;}
 .md2{background:#fff0f0;color:#FF3B30;}
@@ -81,6 +82,43 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .info-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:0.5px solid #f0f0f0;}
 .info-row:last-child{border-bottom:none;}
 .info-lbl{color:#888;}
+
+/* DISPONIBLE CARD */
+.disp-card{border-radius:14px;padding:16px 18px;margin-bottom:12px;color:#fff;}
+.disp-card.positivo{background:linear-gradient(135deg,#007AFF 0%,#0056CC 100%);}
+.disp-card.negativo{background:linear-gradient(135deg,#FF3B30 0%,#cc2200 100%);}
+.disp-card.cero{background:linear-gradient(135deg,#8e8e93 0%,#636366 100%);}
+.disp-label{font-size:11px;opacity:.8;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.disp-valor{font-size:36px;font-weight:800;letter-spacing:-1px;margin:4px 0 2px;}
+.disp-formula{font-size:11px;opacity:.75;line-height:1.6;}
+.disp-formula span{opacity:1;font-weight:600;}
+.disp-estado{font-size:12px;font-weight:600;margin-top:8px;padding:5px 10px;border-radius:20px;display:inline-block;background:rgba(255,255,255,0.2);}
+
+/* REPARTO */
+.rep-barra-wrap{margin-bottom:10px;}
+.rep-barra{height:12px;border-radius:6px;overflow:hidden;display:flex;margin-top:6px;}
+.rep-seg{height:100%;transition:width .3s;}
+.rep-restante{font-size:13px;font-weight:600;padding:8px 12px;border-radius:8px;margin-bottom:10px;text-align:center;}
+.rep-ok{background:#e8f8ed;color:#34C759;}
+.rep-warn{background:#fff5e6;color:#FF9500;}
+.rep-over{background:#fff0f0;color:#FF3B30;}
+.rep-row{display:flex;align-items:center;gap:8px;background:#f5f5f7;border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.rep-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.rep-info{flex:1;min-width:0;}
+.rep-nombre{font-size:13px;font-weight:600;}
+.rep-sub{font-size:11px;color:#888;margin-top:1px;}
+.rep-inp{width:80px;padding:6px 8px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;text-align:right;outline:none;font-family:inherit;background:#fff;}
+.rep-inp:focus{border-color:#007AFF;}
+.rep-tipo-lbl{font-size:11px;color:#888;width:14px;}
+.empresa-tag{font-size:10px;background:#fff5e6;color:#FF9500;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:600;}
+
+/* MES SELECTOR */
+.mes-sel{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.mes-btn{background:#f5f5f7;border:none;border-radius:8px;padding:6px 14px;font-size:15px;cursor:pointer;}
+.mes-lbl{font-size:15px;font-weight:600;}
+
+/* ALERT */
+.alert-box{background:#fff0f0;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;font-size:13px;color:#FF3B30;font-weight:500;}
 </style>
 </head>
 <body>
@@ -107,20 +145,25 @@ if(!DATA.tj)DATA.tj=[];if(!DATA.fijos)DATA.fijos=[];
 var TJ=DATA.tj,FJ=DATA.fijos;
 var AC=null,MT='adelanto',NW=[];
 var hoy=new Date();
+var MFILTRO={y:hoy.getFullYear(),m:hoy.getMonth()};
 var dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 var meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+var MESES_FULL=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var REPCOLORS=['#007AFF','#34C759','#5856D6','#FF9500','#FF3B30','#0d9488','#db2777','#ea580c'];
 document.getElementById('fh').textContent=dias[hoy.getDay()]+' '+hoy.getDate()+' '+meses[hoy.getMonth()]+' '+hoy.getFullYear();
 var CATS_NEG=['Agua','Luz','Gas','Internet','Alquiler local','Otro negocio'];
 var CATS_PERS=['Alquiler cuarto','Seguro salud','SOAT','Otro personal'];
 
 function sv(){localStorage.setItem(DB,JSON.stringify({tj:TJ,fijos:FJ}));}
 function fm(n){return 'S/'+Math.abs(n).toFixed(2);}
+function fms(n){return (n<0?'-':'')+'S/'+Math.abs(n).toFixed(2);}
 function fs(n){return 'S/'+Math.abs(Math.round(n));}
 function ini(n){var p=n.trim().split(' ');return(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase();}
 function cm(){document.getElementById('modal').innerHTML='';}
 function fechaHoy(){var h=new Date();return h.getDate()+'/'+(h.getMonth()+1)+'/'+h.getFullYear();}
 function horaAhora(){var h=new Date();return h.getHours().toString().padStart(2,'0')+':'+h.getMinutes().toString().padStart(2,'0');}
 function fechaHora(){return fechaHoy()+' '+horaAhora();}
+function tsToMes(ts){var d=new Date(ts);return{y:d.getFullYear(),m:d.getMonth()};}
 
 function calc(t){
   var a=0,i2=0,o=0,gp={},pg={},gf=0;
@@ -134,16 +177,38 @@ function calc(t){
     else if(m.t==='pago'){var k2=m.p&&pg[m.p]!==undefined?m.p:'yo';pg[k2]=(pg[k2]||0)+m.m;}
     else if(m.t==='fijo')gf+=m.m;
   });
-  var cob=a+i2,tgp=Object.values(gp).reduce(function(x,y){return x+y;},0),disp=cob-o-tgp-gf;
-  var pp={};
-  ws.forEach(function(w){var d=w.tp==='pct'?(disp*(w.v/100)):w.v;pp[w.id]=Math.max(0,d-(pg[w.id]||0));});
+  var cob=a+i2;
+  var tgp=Object.values(gp).reduce(function(x,y){return x+y;},0);
+  // DISPONIBLE REAL: cobrado - gastos obra - gastos personal - gastos fijos del trabajo
+  var disp=cob-o-tgp-gf;
+  // reparto: cuánto le toca a cada socio del disponible
+  var rep=t.reparto||[];
+  var repCalc={};
+  rep.forEach(function(r){
+    repCalc[r.id]=r.tp==='pct'?(disp*(r.v/100)):r.v;
+  });
+  // ganancia empresa del reparto
+  var gEmpresa=rep.filter(function(r){return r.esEmpresa;}).reduce(function(a,r){return a+repCalc[r.id];},0);
+  // "mi parte" = lo que le toca al worker 'yo' del reparto, o si no hay reparto, del disponible según su %
   var mw=ws.find(function(w){return w.id==='yo';})||ws[0];
-  var mp=mw.tp==='pct'?(disp*(mw.v/100)):mw.v;
-  return{a,i2,cob,o,gp,pg,pp,gf,disp,mp,pc:t.total>0?(t.total-cob):0};
+  var mp;
+  if(rep.length>0){
+    var myRep=rep.find(function(r){return r.esYo;});
+    mp=myRep?repCalc[myRep.id]:0;
+  } else {
+    mp=mw.tp==='pct'?(disp*(mw.v/100)):mw.v;
+  }
+  mp=Math.max(0,mp);
+  var pp={};
+  ws.forEach(function(w){
+    var debe=w.tp==='pct'?(disp*(w.v/100)):w.v;
+    pp[w.id]=Math.max(0,debe-(pg[w.id]||0));
+  });
+  return{a,i2,cob,o,gp,pg,pp,gf,disp,mp,gEmpresa,repCalc,pc:t.total>0?(t.total-cob):0};
 }
 
 function br(lbl,val,mx,col,tc){
-  var p=Math.round((val/Math.max(mx,1))*100);
+  var p=Math.round((Math.abs(val)/Math.max(Math.abs(mx),1))*100);
   return '<div class="bar"><div class="bl">'+lbl+'</div><div class="bt"><div class="bf" style="width:'+p+'%;background:'+col+';"></div></div><div class="bv" style="color:'+tc+';">'+fs(val)+'</div></div>';
 }
 
@@ -154,39 +219,112 @@ function go(s){
   if(s==='res')rRes();if(s==='trab')rList();if(s==='fijos')rFijos();if(s==='new')rNew();
 }
 
+function cambiarMes(delta){
+  MFILTRO.m+=delta;
+  if(MFILTRO.m>11){MFILTRO.m=0;MFILTRO.y++;}
+  if(MFILTRO.m<0){MFILTRO.m=11;MFILTRO.y--;}
+  rRes();
+}
+
+function tjDelMes(){
+  // trabajos que tienen al menos un movimiento en ese mes, o fueron creados ese mes
+  return TJ.filter(function(t){
+    // check por fecha de creación
+    var partes=t.f.split('/');
+    if(partes.length===3){
+      var d=parseInt(partes[0]),m2=parseInt(partes[1])-1,y2=parseInt(partes[2]);
+      if(y2===MFILTRO.y&&m2===MFILTRO.m)return true;
+    }
+    // o si tiene movimientos ese mes
+    return (t.movs||[]).some(function(mv){
+      if(!mv.fh)return false;
+      var p=mv.fh.split('/');
+      if(p.length<2)return false;
+      return parseInt(p[1])-1===MFILTRO.m&&parseInt(p[2])===MFILTRO.y;
+    });
+  });
+}
+
 function totalFijosMes(){
-  var m=hoy.getMonth(),y=hoy.getFullYear();
-  return FJ.filter(function(f){var d=new Date(f.ts);return d.getMonth()===m&&d.getFullYear()===y;}).reduce(function(a,f){return a+f.m;},0);
+  return FJ.filter(function(f){
+    var d=new Date(f.ts);return d.getMonth()===MFILTRO.m&&d.getFullYear()===MFILTRO.y;
+  }).reduce(function(a,f){return a+f.m;},0);
 }
 
 function rRes(){
   var el=document.getElementById('s-res');
-  var tc=0,tm=0,to=0,tp=0;
-  TJ.forEach(function(t){var c=calc(t);tc+=c.cob;tm+=c.mp;to+=c.o;tp+=Object.values(c.gp).reduce(function(a,b){return a+b;},0);});
+  var lista=tjDelMes();
+  var tc=0,to=0,tgpAll=0,tmpAll=0,tEmpresa=0;
+  lista.forEach(function(t){
+    var c=calc(t);
+    tc+=c.cob;
+    to+=c.o;
+    tgpAll+=Object.values(c.gp).reduce(function(a,b){return a+b;},0);
+    tmpAll+=c.mp;
+    tEmpresa+=c.gEmpresa;
+  });
   var tfm=totalFijosMes();
-  var mx=Math.max(tc,tm,to,tp,tfm,1);
-  var html='<div class="mg">'+
-    '<div class="mt"><div class="ml">Cobrado</div><div class="mv green">'+fm(tc)+'</div></div>'+
-    '<div class="mt"><div class="ml">Mi ganancia</div><div class="mv blue">'+fm(tm)+'</div></div>'+
-    '<div class="mt"><div class="ml">Gasto obra</div><div class="mv red">'+fm(to)+'</div></div>'+
-    '<div class="mt"><div class="ml">Gastos fijos</div><div class="mv orange">'+fm(tfm)+'</div></div>'+
-  '</div>'+
-  '<div class="card"><div class="ch">Desglose total</div>'+
-    br('Cobrado',tc,mx,'#34C759','#28a745')+
-    br('Mi ganancia',tm,mx,'#007AFF','#0056CC')+
-    br('Gasto obra',to,mx,'#FF3B30','#cc2200')+
-    br('Gastos fijos',tfm,mx,'#FF9500','#cc7700')+
-  '</div>';
-  if(TJ.length){
-    html+='<div class="card"><div class="ch">Trabajos recientes</div>'+
-      TJ.slice(0,5).map(function(t){var c=calc(t);
+  // DISPONIBLE GLOBAL = suma de disponibles de todos los trabajos del mes - fijos del mes
+  var dispGlobal=tc-to-tgpAll-tfm;
+
+  var esMesActual=MFILTRO.m===hoy.getMonth()&&MFILTRO.y===hoy.getFullYear();
+
+  // tarjeta disponible
+  var dispClass=dispGlobal>0?'positivo':dispGlobal<0?'negativo':'cero';
+  var dispIcon=dispGlobal>0?'💰':dispGlobal<0?'⚠️':'➖';
+  var dispEstado=dispGlobal>0?'Hay plata en caja':dispGlobal<0?'Estás en negativo':'Sin movimientos';
+
+  // alerta cobros pendientes
+  var pendCobro=lista.filter(function(t){return t.total>0&&calc(t).pc>0&&t.est==='activo';});
+  var alertHtml='';
+  if(pendCobro.length&&esMesActual){
+    var totalPend=pendCobro.reduce(function(a,t){return a+calc(t).pc;},0);
+    alertHtml='<div class="alert-box">⚠️ '+pendCobro.length+' trabajo'+(pendCobro.length>1?'s':'')+' sin cobrar completo · '+fm(totalPend)+'</div>';
+  }
+
+  var html=
+    '<div class="mes-sel">'+
+      '<button class="mes-btn" onclick="cambiarMes(-1)">‹</button>'+
+      '<span class="mes-lbl">'+MESES_FULL[MFILTRO.m]+' '+MFILTRO.y+'</span>'+
+      '<button class="mes-btn" onclick="cambiarMes(1)">›</button>'+
+    '</div>'+
+    alertHtml+
+    // TARJETA DISPONIBLE
+    '<div class="disp-card '+dispClass+'">'+
+      '<div class="disp-label">'+dispIcon+' Disponible en caja</div>'+
+      '<div class="disp-valor">'+(dispGlobal<0?'-':'')+fm(dispGlobal)+'</div>'+
+      '<div class="disp-formula">'+
+        '<span>'+fm(tc)+'</span> cobrado'+
+        ' &minus; <span>'+fm(to)+'</span> gastos obra'+
+        ' &minus; <span>'+fm(tgpAll)+'</span> gastos personal'+
+        ' &minus; <span>'+fm(tfm)+'</span> fijos'+
+      '</div>'+
+      '<div class="disp-estado">'+dispEstado+'</div>'+
+    '</div>'+
+    '<div class="mg">'+
+      '<div class="mt"><div class="ml">Cobrado</div><div class="mv green">'+fm(tc)+'</div></div>'+
+      '<div class="mt"><div class="ml">Mi parte</div><div class="mv purple">'+fm(tmpAll)+'</div></div>'+
+      '<div class="mt"><div class="ml">Ganancia empresa</div><div class="mv teal">'+fm(tEmpresa)+'</div></div>'+
+      '<div class="mt"><div class="ml">Gastos fijos</div><div class="mv orange">'+fm(tfm)+'</div></div>'+
+    '</div>';
+
+  if(lista.length){
+    html+='<div class="card"><div class="ch">Trabajos del mes</div>'+
+      lista.map(function(t){var c=calc(t);
+        var dispT=c.disp;
+        var col=dispT>=0?'#007AFF':'#FF3B30';
         return '<div class="mr" onclick="det('+t.id+')" style="cursor:pointer;">'+
-          '<div class="mf"><div class="md">'+t.n+'<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+( t.est==='activo'?'Activo':'Cerrado')+'</span></div>'+
-          '<div class="mm">Inicio: '+t.f+'</div></div>'+
+          '<div style="width:34px;height:34px;border-radius:10px;background:#e8f0ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">💼</div>'+
+          '<div class="mf">'+
+            '<div class="md">'+t.n+'<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+(t.est==='activo'?'Activo':'Cerrado')+'</span></div>'+
+            '<div class="mm">'+fm(c.cob)+' cobrado · disponible: <span style="color:'+col+';font-weight:600;">'+(dispT<0?'-':'')+fm(dispT)+'</span></div>'+
+          '</div>'+
           '<div class="ma" style="color:#5856D6;">'+fm(c.mp)+'</div></div>';
       }).join('')+'</div>';
+  } else {
+    html+='<div class="empty" style="padding:40px 0;">📭<br><br>Sin trabajos este mes.</div>';
   }
-  if(!TJ.length&&!FJ.length)html='<div class="empty" style="padding:50px 0;">💼<br><br>Sin datos aún.<br>Toca <b>Nuevo</b> para empezar.</div>';
+
   el.innerHTML=html;
 }
 
@@ -196,7 +334,7 @@ function rList(){
   el.innerHTML='<div class="card">'+TJ.map(function(t){var c=calc(t);
     return '<div class="mr" onclick="det('+t.id+')" style="cursor:pointer;">'+
       '<div style="width:34px;height:34px;border-radius:10px;background:#e8f0ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">💼</div>'+
-      '<div class="mf"><div class="md">'+t.n+'<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+( t.est==='activo'?'Activo':'Cerrado')+'</span></div>'+
+      '<div class="mf"><div class="md">'+t.n+'<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+(t.est==='activo'?'Activo':'Cerrado')+'</span></div>'+
       '<div class="mm">'+t.f+(t.fcierre?' → '+t.fcierre:'')+' · '+(t.ws||[]).map(function(w){return w.n;}).join(', ')+'</div></div>'+
       '<div class="ma" style="color:#5856D6;">'+fm(c.mp)+'</div></div>';
   }).join('')+'</div>';
@@ -209,17 +347,18 @@ function rNew(){
     '<div class="field"><label>Nombre del trabajo</label><input id="nn" placeholder="Ej: Instalación eléctrica" autocomplete="off"/></div>'+
     '<div class="field"><label>Total acordado (S/) — opcional</label><input id="nt" type="number" placeholder="0" inputmode="decimal"/></div>'+
     '</div>'+
-    '<div class="card"><div class="ch">Tu pago</div>'+
-    '<div class="r2"><div class="field"><label>Tipo de pago</label><select id="yo-tp"><option value="pct">% de ganancia</option><option value="fijo">Monto fijo (S/)</option></select></div>'+
-    '<div class="field"><label id="yo-vl">Tu % de ganancia</label><input id="yo-v" type="number" placeholder="100" inputmode="decimal"/></div></div>'+
-    '</div>'+
-    '<div class="card"><div class="ch">Otros trabajadores</div>'+
-    '<div style="font-size:12px;color:#888;margin-bottom:10px;">Agrega a tu papá, ayudantes, etc.</div>'+
+    '<div class="card"><div class="ch">Equipo de trabajo</div>'+
+    '<div style="font-size:12px;color:#888;margin-bottom:12px;">Agrega a todos los que trabajan en este proyecto. El reparto de ganancias lo defines después, en cancha.</div>'+
     '<div id="ew"></div>'+
-    '<div class="r2"><div class="field"><label>Nombre</label><input id="wn" placeholder="Papá" autocomplete="off"/></div>'+
+    '<div class="r2"><div class="field"><label>Nombre</label><input id="wn" placeholder="Papá, Miguel..." autocomplete="off"/></div>'+
     '<div class="field"><label>Tipo de pago</label><select id="wt"><option value="pct">% ganancia</option><option value="fijo">Monto fijo</option></select></div></div>'+
     '<div class="field"><label id="wvl">% que le toca</label><input id="wv" type="number" placeholder="30" inputmode="decimal"/></div>'+
-    '<button class="btn bk" onclick="addW()" style="margin-top:0;margin-bottom:6px;">+ Agregar trabajador</button></div>'+
+    '<button class="btn bk" onclick="addW()" style="margin-top:0;margin-bottom:6px;">+ Agregar al equipo</button></div>'+
+    '<div class="card"><div class="ch">Tu pago</div>'+
+    '<div class="r2"><div class="field"><label>Tipo</label><select id="yo-tp"><option value="pct">% de ganancia</option><option value="fijo">Monto fijo (S/)</option></select></div>'+
+    '<div class="field"><label id="yo-vl">Tu % de ganancia</label><input id="yo-v" type="number" placeholder="100" inputmode="decimal"/></div></div>'+
+    '<div class="hint">Podés ajustar esto después desde el detalle del trabajo</div>'+
+    '</div>'+
     '<button class="btn bg" onclick="crearT()">✓ Crear trabajo</button>';
   document.getElementById('wt').onchange=function(){
     document.getElementById('wvl').textContent=this.value==='pct'?'% que le toca':'Monto fijo (S/)';
@@ -252,7 +391,7 @@ function crearT(){
   var yoTp=document.getElementById('yo-tp').value;
   var yoV=parseFloat(document.getElementById('yo-v').value)||(yoTp==='pct'?100:0);
   var ws=[{id:'yo',n:'Yo',tp:yoTp,v:yoV}].concat(NW);
-  var t={id:Date.now(),n:n,total:parseFloat(document.getElementById('nt').value)||0,ws:ws,est:'activo',movs:[],f:fechaHoy(),fcierre:null};
+  var t={id:Date.now(),n:n,total:parseFloat(document.getElementById('nt').value)||0,ws:ws,reparto:[],est:'activo',movs:[],f:fechaHoy(),fcierre:null};
   TJ.unshift(t);sv();AC=t;det(t.id);
 }
 
@@ -399,7 +538,7 @@ function confCerrar(){
   document.getElementById('modal').innerHTML=
     '<div class="modal-bg" onclick="cm()"><div class="modal-sheet" onclick="event.stopPropagation()">'+
     '<div class="modal-handle"></div><div class="modal-title">¿Cerrar "'+AC.n+'"?</div>'+
-    '<div style="font-size:14px;color:#888;margin-bottom:4px;">Se registrará la fecha de cierre. Ya no podrás editar movimientos.</div>'+
+    '<div style="font-size:14px;color:#888;margin-bottom:4px;">Se registrará la fecha de cierre.</div>'+
     '<div class="modal-actions"><button class="mc" onclick="cm()">Cancelar</button><button class="ms" onclick="cerrarT()">Cerrar trabajo</button></div>'+
     '</div></div>';
 }
@@ -408,6 +547,103 @@ function cerrarT(){
   AC.est='cerrado';AC.fcierre=fechaHora();
   var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
   sv();cm();rDet();
+}
+
+// ── REPARTO ────────────────────────────────────────────────────────────────
+function abrirReparto(){
+  if(!AC)return;
+  var c=calc(AC);
+  var rep=AC.reparto||[];
+  var disp=c.disp;
+
+  function calcRepMonto(r){return r.tp==='pct'?(disp*(r.v/100)):r.v;}
+  var asignado=rep.reduce(function(a,r){return a+calcRepMonto(r);},0);
+  var restante=disp-asignado;
+  var pct=disp>0?Math.min(100,(asignado/disp)*100):0;
+
+  var segmentos=rep.map(function(r,i){
+    var p=disp>0?(calcRepMonto(r)/disp)*100:0;
+    return '<div class="rep-seg" style="width:'+p+'%;background:'+REPCOLORS[i%REPCOLORS.length]+';"></div>';
+  }).join('');
+
+  var rCls=Math.abs(restante)<0.01?'rep-ok':restante>0?'rep-warn':'rep-over';
+  var rTxt=Math.abs(restante)<0.01?'✅ Todo el disponible está repartido':restante>0?'⚠️ Faltan '+fm(restante)+' por asignar':'🚫 Te pasaste '+fm(Math.abs(restante));
+
+  var repRows=rep.map(function(r,i){
+    var s=calcRepMonto(r);
+    var eTag=r.esEmpresa?'<span class="empresa-tag">EMPRESA</span>':'';
+    var yTag=r.esYo?'<span class="empresa-tag" style="background:#e8f0ff;color:#007AFF;">TÚ</span>':'';
+    return '<div class="rep-row">'+
+      '<div class="rep-dot" style="background:'+REPCOLORS[i%REPCOLORS.length]+';"></div>'+
+      '<div class="rep-info">'+
+        '<div class="rep-nombre">'+(r.esEmpresa?'🏢':r.esYo?'👤':'👤')+' '+r.n+eTag+yTag+'</div>'+
+        '<div class="rep-sub">'+(r.tp==='pct'?r.v+'% del disponible':'Monto fijo')+' → '+fm(s)+'</div>'+
+      '</div>'+
+      '<input class="rep-inp" type="number" value="'+r.v+'" onchange="editRep(\''+r.id+'\',this.value)">'+
+      '<span class="rep-tipo-lbl">'+(r.tp==='pct'?'%':'S/')+'</span>'+
+      '<button onclick="delRep(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;color:#FF3B30;font-size:18px;padding:4px;">×</button>'+
+    '</div>';
+  }).join('');
+
+  document.getElementById('modal').innerHTML=
+    '<div class="modal-bg" onclick="cm()"><div class="modal-sheet" onclick="event.stopPropagation()">'+
+    '<div class="modal-handle"></div>'+
+    '<div class="modal-title">💰 Reparto del trabajo<br><span style="font-size:13px;color:#888;font-weight:400;">Disponible: '+fm(disp)+'</span></div>'+
+    // barra
+    '<div class="rep-barra-wrap">'+
+      '<div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:4px;">'+
+        '<span>Asignado: '+fm(asignado)+'</span><span>Total disponible: '+fm(disp)+'</span>'+
+      '</div>'+
+      '<div class="rep-barra">'+segmentos+(pct<100?'<div class="rep-seg" style="width:'+(100-pct)+'%;background:#f0f0f0;"></div>':'')+
+      '</div>'+
+    '</div>'+
+    '<div class="rep-restante '+rCls+'">'+rTxt+'</div>'+
+    repRows+
+    '<div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #f0f0f0;">'+
+      '<div style="font-size:12px;color:#888;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;">Agregar persona</div>'+
+      '<div class="r2" style="margin-bottom:8px;">'+
+        '<div class="field" style="margin-bottom:0;"><label>Nombre</label><input id="rep-n" placeholder="Yo, Papá, Empresa..."/></div>'+
+        '<div class="field" style="margin-bottom:0;"><label>Tipo</label><select id="rep-tp" onchange="updRepLbl()"><option value="pct">Porcentaje (%)</option><option value="fijo">Monto fijo (S/)</option></select></div>'+
+      '</div>'+
+      '<div class="r2" style="margin-bottom:8px;">'+
+        '<div class="field" style="margin-bottom:0;"><label id="rep-vlbl">Porcentaje (%)</label><input id="rep-v" type="number" placeholder="30" inputmode="decimal"/></div>'+
+        '<div class="field" style="margin-bottom:0;"><label>¿Quién es?</label><select id="rep-rol"><option value="">Otro</option><option value="yo">Soy yo</option><option value="empresa">Ganancia empresa</option></select></div>'+
+      '</div>'+
+      '<button class="btn bteal" style="padding:10px;margin-top:0;" onclick="addRep()">+ Agregar al reparto</button>'+
+    '</div>'+
+    '<div class="modal-actions" style="margin-top:8px;"><button class="ms" onclick="cm();rDet();">Listo</button></div>'+
+    '</div></div>';
+}
+
+function updRepLbl(){
+  var t=document.getElementById('rep-tp');
+  if(t)document.getElementById('rep-vlbl').textContent=t.value==='pct'?'Porcentaje (%)':'Monto (S/)';
+}
+
+function addRep(){
+  var n=document.getElementById('rep-n').value.trim();
+  var tp=document.getElementById('rep-tp').value;
+  var v=parseFloat(document.getElementById('rep-v').value)||0;
+  var rol=document.getElementById('rep-rol').value;
+  if(!n){alert('Escribe el nombre');return;}
+  if(!AC.reparto)AC.reparto=[];
+  AC.reparto.push({id:'r'+Date.now(),n:n,tp:tp,v:v,esYo:rol==='yo',esEmpresa:rol==='empresa'});
+  var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
+  sv();abrirReparto();
+}
+
+function editRep(rid,val){
+  var r=AC.reparto.find(function(x){return x.id===rid;});
+  if(!r)return;
+  r.v=parseFloat(val)||0;
+  var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
+  sv();abrirReparto();
+}
+
+function delRep(rid){
+  AC.reparto=AC.reparto.filter(function(r){return r.id!==rid;});
+  var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
+  sv();abrirReparto();
 }
 
 function exportCSV(){
@@ -421,10 +657,19 @@ function exportCSV(){
   rows.push(['Total acordado',AC.total||'No definido','','','']);
   rows.push(['Cobrado',c.cob.toFixed(2),'','','']);
   rows.push(['Gasto obra',c.o.toFixed(2),'','','']);
-  rows.push(['Gastos fijos',c.gf.toFixed(2),'','','']);
+  rows.push(['Gastos personales',Object.values(c.gp).reduce(function(a,b){return a+b;},0).toFixed(2),'','','']);
   rows.push(['Disponible',c.disp.toFixed(2),'','','']);
   rows.push(['Mi parte',c.mp.toFixed(2),'','','']);
+  rows.push(['Ganancia empresa',c.gEmpresa.toFixed(2),'','','']);
   rows.push(['','','','','']);
+  if(AC.reparto&&AC.reparto.length){
+    rows.push(['REPARTO','Tipo','Valor','Monto calculado','']);
+    AC.reparto.forEach(function(r){
+      var s=r.tp==='pct'?(c.disp*(r.v/100)):r.v;
+      rows.push([r.n+(r.esEmpresa?' (EMPRESA)':r.esYo?' (YO)':''),r.tp==='pct'?'Porcentaje':'Monto fijo',r.v,s.toFixed(2),'']);
+    });
+    rows.push(['','','','','']);
+  }
   rows.push(['TRABAJADORES','Tipo pago','Corresponde','Cobró','Falta']);
   ws.forEach(function(w){
     var pg=c.pg[w.id]||0,pp=c.pp[w.id]||0,debe=w.tp==='pct'?(c.disp*(w.v/100)):w.v;
@@ -456,6 +701,10 @@ function rDet(){
   var mx=Math.max(c.cob,c.o,tgp,c.mp,c.gf,1);
   var wOpts=ws.map(function(w){return '<option value="'+w.id+'">'+w.n+'</option>';}).join('');
 
+  // CARD DISPONIBLE del trabajo
+  var dispClass=c.disp>0?'positivo':c.disp<0?'negativo':'cero';
+  var dispIcon=c.disp>0?'💰':c.disp<0?'⚠️':'➖';
+
   function mList(tipo){
     var l=t.movs.filter(function(m){return m.t===tipo;});
     if(!l.length)return '<div style="font-size:12px;color:#888;padding:3px 0 8px;">Sin registros</div>';
@@ -470,11 +719,30 @@ function rDet(){
     }).join('');
   }
 
+  // reparto chips
+  var rep=t.reparto||[];
+  var repHtml='';
+  if(rep.length){
+    repHtml='<div class="card"><div class="ch">Reparto de ganancias</div>'+
+      rep.map(function(r,i){
+        var s=r.tp==='pct'?(c.disp*(r.v/100)):r.v;
+        var col=REPCOLORS[i%REPCOLORS.length];
+        var eTag=r.esEmpresa?'<span class="empresa-tag">EMPRESA</span>':r.esYo?'<span class="empresa-tag" style="background:#e8f0ff;color:#007AFF;">TÚ</span>':'';
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid #f0f0f0;">'+
+          '<div style="width:8px;height:8px;border-radius:50%;background:'+col+';flex-shrink:0;"></div>'+
+          '<div style="flex:1;font-size:13px;font-weight:600;">'+(r.esEmpresa?'🏢':'👤')+' '+r.n+eTag+'</div>'+
+          '<div style="font-size:13px;font-weight:700;color:'+col+';">'+fm(s)+'</div>'+
+        '</div>';
+      }).join('')+
+      (t.est==='activo'?'<button class="btn bk" style="margin-top:8px;padding:10px;" onclick="abrirReparto()">✏️ Editar reparto</button>':'')+
+    '</div>';
+  }
+
   document.getElementById('s-det').innerHTML=
     '<button class="back" onclick="go(\'trab\')">← Volver</button>'+
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'+
       '<div style="font-size:20px;font-weight:700;">'+t.n+'</div>'+
-      '<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+( t.est==='activo'?'Activo':'Cerrado')+'</span>'+
+      '<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+(t.est==='activo'?'Activo':'Cerrado')+'</span>'+
     '</div>'+
     '<div class="card"><div class="ch">Info del trabajo</div>'+
       '<div class="info-row"><span class="info-lbl">📅 Inicio</span><span>'+t.f+'</span></div>'+
@@ -485,8 +753,19 @@ function rDet(){
     '<div class="mg">'+
       '<div class="mt"><div class="ml">Cobrado</div><div class="mv green">'+fm(c.cob)+'</div></div>'+
       (t.total?'<div class="mt"><div class="ml">Por cobrar</div><div class="mv '+(c.pc>0?'red':'green')+'">'+fm(c.pc)+'</div></div>':'<div class="mt"><div class="ml">Gasto obra</div><div class="mv red">'+fm(c.o)+'</div></div>')+
-      '<div class="mt"><div class="ml">Disponible</div><div class="mv blue">'+fm(c.disp)+'</div></div>'+
       '<div class="mt"><div class="ml">Mi parte</div><div class="mv purple">'+fm(c.mp)+'</div></div>'+
+      '<div class="mt"><div class="ml">Ganancia empresa</div><div class="mv teal">'+fm(c.gEmpresa)+'</div></div>'+
+    '</div>'+
+    // DISPONIBLE con color y fórmula
+    '<div class="disp-card '+dispClass+'" style="margin-bottom:12px;">'+
+      '<div class="disp-label">'+dispIcon+' Disponible de este trabajo</div>'+
+      '<div class="disp-valor">'+(c.disp<0?'-':'')+fm(c.disp)+'</div>'+
+      '<div class="disp-formula">'+
+        '<span>'+fm(c.cob)+'</span> cobrado'+
+        ' &minus; <span>'+fm(c.o)+'</span> gasto obra'+
+        ' &minus; <span>'+fm(tgp)+'</span> gasto personal'+
+        (c.gf?' &minus; <span>'+fm(c.gf)+'</span> fijos':'')+
+      '</div>'+
     '</div>'+
     '<div class="card"><div class="ch">Desglose</div>'+
       br('Cobrado',c.cob,mx,'#34C759','#28a745')+
@@ -507,6 +786,7 @@ function rDet(){
           '<div style="font-size:11px;color:'+(pp>0?'#FF3B30':'#34C759')+';">'+(pp>0?'Falta '+fm(pp):'Al día')+'</div></div></div>';
       }).join('')+
     '</div>'+
+    repHtml+
     (t.est==='activo'?
     '<div class="card"><div class="ch">Registrar movimiento</div>'+
       '<div class="ttabs">'+
@@ -521,7 +801,8 @@ function rDet(){
       '<div class="r2"><div class="field"><label>Categoría</label><select id="mc"><option>Yape</option><option>Efectivo</option><option>Transferencia</option></select></div>'+
       '<div class="field"><label>Monto (S/)</label><input id="mm" type="number" placeholder="0.00" inputmode="decimal"/></div></div>'+
       '<div class="field"><label>Descripción</label><input id="mdesc" placeholder="Ej: pasaje, cemento..." autocomplete="off"/></div>'+
-      '<button class="btn bb" onclick="addM()">+ Agregar</button></div>':
+      '<button class="btn bb" onclick="addM()">+ Agregar</button></div>'+
+      (rep.length===0?'<button class="btn bteal" onclick="abrirReparto()" style="margin-bottom:6px;">💰 Definir reparto de ganancias</button>':''):
     '<div class="card" style="text-align:center;font-size:14px;color:#888;padding:20px;">🔒 Trabajo cerrado — solo lectura</div>')+
     '<div class="card"><div class="ch">Movimientos</div>'+
       '<div class="ssep">Ingresos</div>'+mList('adelanto')+mList('ingreso')+
@@ -530,7 +811,7 @@ function rDet(){
       '<div class="ssep">Gastos fijos</div>'+mList('fijo')+
       '<div class="ssep">Pagos a trabajadores</div>'+mList('pago')+
     '</div>'+
-    '<button class="btn bcsv" onclick="exportCSV()" style="margin-bottom:6px;">📥 Descargar CSV para Google Sheets</button>'+
+    '<button class="btn bcsv" onclick="exportCSV()" style="margin-bottom:6px;">📥 Descargar CSV</button>'+
     '<div class="hint">Descarga → abre con Hojas de cálculo de Google</div>'+
     (t.est==='activo'?'<button class="btn bk" onclick="confCerrar()" style="margin-bottom:6px;margin-top:10px;">🔒 Cerrar trabajo</button>':'')+
     '<button class="btn br" onclick="confDelT()" style="margin-bottom:30px;margin-top:4px;">🗑 Eliminar trabajo</button>';
@@ -539,4 +820,3 @@ rRes();
 </script>
 </body>
 </html>
-
