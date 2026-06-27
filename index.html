@@ -39,7 +39,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bcsv{background:#34C759;color:#fff;}
 .borange{background:#FF9500;color:#fff;}
 .bteal{background:#0d9488;color:#fff;}
-.bpurple{background:#5856D6;color:#fff;}
 .back{font-size:14px;color:#007AFF;background:none;border:none;cursor:pointer;padding:0;margin-bottom:12px;display:flex;align-items:center;gap:4px;font-weight:500;}
 .empty{font-size:14px;color:#888;text-align:center;padding:30px 0;}
 .badge{font-size:10px;padding:2px 8px;border-radius:20px;margin-left:6px;font-weight:600;}
@@ -112,11 +111,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mes-btn{background:#f5f5f7;border:none;border-radius:8px;padding:6px 14px;font-size:15px;cursor:pointer;}
 .mes-lbl{font-size:15px;font-weight:600;}
 .alert-box{background:#fff0f0;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;font-size:13px;color:#FF3B30;font-weight:500;}
-/* RESUMEN MOVIMIENTOS */
 .mov-resumen{background:#f5f5f7;border-radius:10px;padding:12px 14px;margin-top:12px;}
 .mov-res-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;}
 .mov-res-row.total{border-top:0.5px solid #e0e0e0;margin-top:6px;padding-top:8px;font-weight:700;font-size:15px;}
-/* TRABAJADOR EDITABLE */
 .tw-edit{background:none;border:none;cursor:pointer;color:#007AFF;font-size:13px;font-weight:600;padding:4px 8px;flex-shrink:0;}
 </style>
 </head>
@@ -153,6 +150,16 @@ document.getElementById('fh').textContent=dias[hoy.getDay()]+' '+hoy.getDate()+'
 var CATS_NEG=['Agua','Luz','Gas','Internet','Alquiler local','Otro negocio'];
 var CATS_PERS=['Alquiler cuarto','Seguro salud','SOAT','Otro personal'];
 
+// Categorías por tipo de movimiento — FIJAS para evitar confusión
+var CATS={
+  adelanto:['Yape','Efectivo','Transferencia','Depósito'],
+  ingreso:['Yape','Efectivo','Transferencia','Depósito'],
+  obra:['Materiales','Herramientas','Transporte obra','Alimentación obra','Otro'],
+  personal:['Movilidad','Desayuno','Almuerzo','Cena','Gasto hormiga','Otro'],
+  pago:['Yape','Efectivo','Transferencia','Depósito'],
+  fijo:['Agua','Luz','Gas','Internet','Alquiler','Otro']
+};
+
 function sv(){localStorage.setItem(DB,JSON.stringify({tj:TJ,fijos:FJ}));}
 function fm(n){return 'S/'+Math.abs(n).toFixed(2);}
 function fs(n){return 'S/'+Math.abs(Math.round(n));}
@@ -170,9 +177,11 @@ function calc(t){
     if(m.t==='adelanto') a+=m.m;
     else if(m.t==='ingreso') i2+=m.m;
     else if(m.t==='obra') o+=m.m;
-    else if(m.t==='personal'){var k=m.p&&gp[m.p]!==undefined?m.p:'yo';gp[k]=(gp[k]||0)+m.m;}
+    else if(m.t==='personal'){
+      var k=m.p&&gp[m.p]!==undefined?m.p:'yo';
+      gp[k]=(gp[k]||0)+m.m;
+    }
     else if(m.t==='pago'){
-      // pagos a trabajadores descuentan de caja
       var k2=m.p&&pg[m.p]!==undefined?m.p:'yo';
       pg[k2]=(pg[k2]||0)+m.m;
       pagos+=m.m;
@@ -181,8 +190,9 @@ function calc(t){
   });
   var cob=a+i2;
   var tgp=Object.values(gp).reduce(function(x,y){return x+y;},0);
-  // DISPONIBLE REAL: todo lo que entra menos todo lo que sale (incluyendo pagos a trabajadores)
+  // disponible = todo lo que entró - todo lo que salió
   var disp=cob-o-tgp-gf-pagos;
+
   var rep=t.reparto||[];
   var repCalc={};
   rep.forEach(function(r){repCalc[r.id]=r.tp==='pct'?(disp*(r.v/100)):r.v;});
@@ -196,11 +206,16 @@ function calc(t){
     mp=mw.tp==='pct'?(disp*(mw.v/100)):mw.v;
   }
   mp=Math.max(0,mp);
+
+  // CORREGIDO: lo que ya recibió cada trabajador = gastos personales suyos + pagos directos
   var pp={};
   ws.forEach(function(w){
     var debe=w.tp==='pct'?(disp*(w.v/100)):w.v;
-    pp[w.id]=Math.max(0,debe-(pg[w.id]||0));
+    // ya recibió = sus gastos personales + pagos que le hiciste
+    var yaRecibio=(gp[w.id]||0)+(pg[w.id]||0);
+    pp[w.id]=Math.max(0,debe-yaRecibio);
   });
+
   return{a,i2,cob,o,gp,pg,pp,gf,pagos,disp,mp,gEmpresa,repCalc,tgp,
     pc:t.total>0?(t.total-cob):0};
 }
@@ -252,7 +267,7 @@ function rRes(){
   var tc=0,to=0,tgpAll=0,tpagos=0,tmpAll=0,tEmpresa=0,tgf=0;
   lista.forEach(function(t){
     var c=calc(t);
-    tc+=c.cob; to+=c.o; tgpAll+=c.tgp; tpagos+=c.pagos; tmpAll+=c.mp; tEmpresa+=c.gEmpresa; tgf+=c.gf;
+    tc+=c.cob;to+=c.o;tgpAll+=c.tgp;tpagos+=c.pagos;tmpAll+=c.mp;tEmpresa+=c.gEmpresa;tgf+=c.gf;
   });
   var tfm=totalFijosMes();
   var dispGlobal=tc-to-tgpAll-tpagos-tgf-tfm;
@@ -264,7 +279,7 @@ function rRes(){
   var alertHtml='';
   if(pendCobro.length&&esMesActual){
     var totalPend=pendCobro.reduce(function(a,t){return a+calc(t).pc;},0);
-    alertHtml='<div class="alert-box">⚠️ '+pendCobro.length+' trabajo'+(pendCobro.length>1?'s':'')+' sin cobrar completo · '+fm(totalPend)+'</div>';
+    alertHtml='<div class="alert-box">⚠️ '+pendCobro.length+' trabajo'+(pendCobro.length>1?'s':'')+' sin cobrar · '+fm(totalPend)+'</div>';
   }
   var html=
     '<div class="mes-sel">'+
@@ -279,7 +294,7 @@ function rRes(){
         '<span>'+fm(tc)+'</span> cobrado'+
         ' − <span>'+fm(to)+'</span> obra'+
         ' − <span>'+fm(tgpAll)+'</span> personal'+
-        ' − <span>'+fm(tpagos)+'</span> pagado trabajadores'+
+        ' − <span>'+fm(tpagos)+'</span> pagos trabajadores'+
         ' − <span>'+fm(tfm+tgf)+'</span> fijos'+
       '</div>'+
       '<div class="disp-estado">'+dispEstado+'</div>'+
@@ -329,15 +344,15 @@ function rNew(){
     '<div class="field"><label>Cliente / dirección (opcional)</label><input id="nnota" placeholder="Nombre cliente, dirección obra..." autocomplete="off"/></div>'+
     '</div>'+
     '<div class="card"><div class="ch">Equipo de trabajo</div>'+
-    '<div style="font-size:12px;color:#888;margin-bottom:12px;">Podés agregar más personas después desde el detalle del trabajo.</div>'+
+    '<div style="font-size:12px;color:#888;margin-bottom:12px;">Podés agregar más personas después desde el detalle.</div>'+
     '<div id="ew"></div>'+
     '<div class="r2"><div class="field"><label>Nombre</label><input id="wn" placeholder="Papá, Miguel..." autocomplete="off"/></div>'+
-    '<div class="field"><label>Tipo de pago</label><select id="wt"><option value="pct">% ganancia</option><option value="fijo">Monto fijo</option></select></div></div>'+
-    '<div class="field"><label id="wvl">% que le toca</label><input id="wv" type="number" placeholder="30" inputmode="decimal"/></div>'+
+    '<div class="field"><label>Tipo de pago</label><select id="wt"><option value="fijo">Monto fijo (S/)</option><option value="pct">% ganancia</option></select></div></div>'+
+    '<div class="field"><label id="wvl">Monto fijo (S/)</label><input id="wv" type="number" placeholder="200" inputmode="decimal"/></div>'+
     '<button class="btn bk" onclick="addW()" style="margin-top:0;margin-bottom:6px;">+ Agregar al equipo</button></div>'+
     '<div class="card"><div class="ch">Tu pago</div>'+
-    '<div class="r2"><div class="field"><label>Tipo</label><select id="yo-tp"><option value="pct">% de ganancia</option><option value="fijo">Monto fijo (S/)</option></select></div>'+
-    '<div class="field"><label id="yo-vl">Tu % de ganancia</label><input id="yo-v" type="number" placeholder="100" inputmode="decimal"/></div></div>'+
+    '<div class="r2"><div class="field"><label>Tipo</label><select id="yo-tp"><option value="fijo">Monto fijo (S/)</option><option value="pct">% de ganancia</option></select></div>'+
+    '<div class="field"><label id="yo-vl">Tu monto fijo (S/)</label><input id="yo-v" type="number" placeholder="500" inputmode="decimal"/></div></div>'+
     '<div class="hint">Podés ajustar esto después desde el detalle del trabajo</div>'+
     '</div>'+
     '<button class="btn bg" onclick="crearT()">✓ Crear trabajo</button>';
@@ -370,7 +385,7 @@ function crearT(){
   var n=document.getElementById('nn').value.trim();
   if(!n){alert('Escribe el nombre del trabajo');return;}
   var yoTp=document.getElementById('yo-tp').value;
-  var yoV=parseFloat(document.getElementById('yo-v').value)||(yoTp==='pct'?100:0);
+  var yoV=parseFloat(document.getElementById('yo-v').value)||0;
   var ws=[{id:'yo',n:'Yo',tp:yoTp,v:yoV}].concat(NW);
   var t={id:Date.now(),n:n,total:parseFloat(document.getElementById('nt').value)||0,
     nota:document.getElementById('nnota').value.trim(),
@@ -441,41 +456,66 @@ function det(id){
   MT='adelanto';rDet();
 }
 
+// CORREGIDO: setMT ahora actualiza categorías de forma limpia usando objeto CATS
 function setMT(tp){
   MT=tp;
   var cls={adelanto:'ta',ingreso:'ti2',obra:'to',personal:'tp',pago:'tpg',fijo:'tfx'};
-  document.querySelectorAll('.tt').forEach(function(b){b.className='tt'+(b.dataset.t===tp?' '+cls[tp]:'');});
-  var pw=document.getElementById('pw');if(pw)pw.style.display=(tp==='personal'||tp==='pago')?'block':'none';
-  var cat=document.getElementById('mc');if(!cat)return;
-  if(tp==='obra')cat.innerHTML='<option>Materiales</option><option>Herramientas</option><option>Transporte obra</option><option>Otro</option>';
-  else if(tp==='personal')cat.innerHTML='<option>Movilidad</option><option>Desayuno</option><option>Almuerzo</option><option>Cena</option><option>Gasto hormiga</option><option>Otro</option>';
-  else if(tp==='fijo')cat.innerHTML=CATS_NEG.concat(CATS_PERS).map(function(c){return '<option>'+c+'</option>';}).join('');
-  else cat.innerHTML='<option>Yape</option><option>Efectivo</option><option>Transferencia</option>';
+  document.querySelectorAll('.tt').forEach(function(b){
+    b.className='tt'+(b.dataset.t===tp?' '+cls[tp]:'');
+  });
+  // mostrar/ocultar selector de persona
+  var pw=document.getElementById('pw');
+  if(pw) pw.style.display=(tp==='personal'||tp==='pago')?'block':'none';
+  // actualizar categorías desde objeto fijo — sin ambigüedad
+  var cat=document.getElementById('mc');
+  if(!cat) return;
+  var opts=CATS[tp]||['Otro'];
+  cat.innerHTML=opts.map(function(c){return '<option>'+c+'</option>';}).join('');
 }
 
 function addM(){
-  if(!AC)return;
+  if(!AC) return;
   var m=parseFloat(document.getElementById('mm').value);
   if(!m||m<=0){alert('Ingresa un monto');return;}
-  var cat=document.getElementById('mc').value,desc=document.getElementById('mdesc').value.trim()||cat;
+  // guardar tipo del movimiento desde MT (variable global), NO desde el selector
+  var cat=document.getElementById('mc').value;
+  var desc=document.getElementById('mdesc').value.trim()||cat;
   var pe=document.getElementById('mper');
-  AC.movs.unshift({id:Date.now(),t:MT,m:m,cat:cat,d:desc,p:pe?pe.value:'yo',fh:fechaHora()});
-  var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
-  sv();document.getElementById('mm').value='';document.getElementById('mdesc').value='';rDet();
+  var persona=pe?pe.value:'yo';
+  AC.movs.unshift({
+    id:Date.now(),
+    t:MT,          // tipo siempre viene de MT, nunca de la categoría
+    m:m,
+    cat:cat,
+    d:desc,
+    p:persona,
+    fh:fechaHora()
+  });
+  var idx=TJ.findIndex(function(t){return t.id===AC.id;});
+  if(idx>-1) TJ[idx]=AC;
+  sv();
+  document.getElementById('mm').value='';
+  document.getElementById('mdesc').value='';
+  rDet();
 }
 
 function showEdit(mid){
   var mv=AC.movs.find(function(x){return x.id===mid;});if(!mv)return;
   var ws=AC.ws||[];
   var wOpts=ws.map(function(w){return '<option value="'+w.id+'"'+(mv.p===w.id?' selected':'')+'>'+w.n+'</option>';}).join('');
-  var tOpts=['adelanto','ingreso','obra','personal','pago','fijo'].map(function(tp){
-    var l={adelanto:'Adelanto',ingreso:'Pago final',obra:'Gasto obra',personal:'Gasto personal',pago:'Pago trabajador',fijo:'Gasto fijo'};
-    return '<option value="'+tp+'"'+(mv.t===tp?' selected':'')+'>'+l[tp]+'</option>';
+  var tLabels={adelanto:'Adelanto',ingreso:'Pago final',obra:'Gasto obra',personal:'Gasto personal',pago:'Pago trabajador',fijo:'Gasto fijo'};
+  var tOpts=Object.keys(tLabels).map(function(tp){
+    return '<option value="'+tp+'"'+(mv.t===tp?' selected':'')+'>'+tLabels[tp]+'</option>';
+  }).join('');
+  // cats del tipo actual
+  var catOpts=(CATS[mv.t]||['Otro']).map(function(c){
+    return '<option'+(mv.cat===c?' selected':'')+'>'+c+'</option>';
   }).join('');
   document.getElementById('modal').innerHTML=
     '<div class="modal-bg" onclick="cm()"><div class="modal-sheet" onclick="event.stopPropagation()">'+
     '<div class="modal-handle"></div><div class="modal-title">✏️ Editar movimiento</div>'+
-    '<div class="field"><label>Tipo</label><select id="et">'+tOpts+'</select></div>'+
+    '<div class="field"><label>Tipo</label><select id="et" onchange="updEditCats('+mid+')">'+tOpts+'</select></div>'+
+    '<div class="field"><label>Categoría</label><select id="ecat">'+catOpts+'</select></div>'+
     '<div class="field"><label>Descripción</label><input id="ed" value="'+mv.d+'" autocomplete="off"/></div>'+
     '<div class="r2"><div class="field"><label>Monto (S/)</label><input id="em" type="number" value="'+mv.m+'" inputmode="decimal"/></div>'+
     '<div class="field"><label>¿Para quién?</label><select id="ep">'+wOpts+'</select></div></div>'+
@@ -483,10 +523,19 @@ function showEdit(mid){
     '</div></div>';
 }
 
+function updEditCats(mid){
+  var tp=document.getElementById('et').value;
+  var cat=document.getElementById('ecat');
+  if(cat) cat.innerHTML=(CATS[tp]||['Otro']).map(function(c){return '<option>'+c+'</option>';}).join('');
+}
+
 function saveEdit(mid){
   var mv=AC.movs.find(function(x){return x.id===mid;});if(!mv)return;
-  mv.t=document.getElementById('et').value;mv.d=document.getElementById('ed').value.trim()||mv.d;
-  mv.m=parseFloat(document.getElementById('em').value)||mv.m;mv.p=document.getElementById('ep').value;
+  mv.t=document.getElementById('et').value;
+  mv.cat=document.getElementById('ecat').value;
+  mv.d=document.getElementById('ed').value.trim()||mv.d;
+  mv.m=parseFloat(document.getElementById('em').value)||mv.m;
+  mv.p=document.getElementById('ep').value;
   var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
   sv();cm();rDet();
 }
@@ -532,7 +581,6 @@ function cerrarT(){
   sv();cm();rDet();
 }
 
-// ── AGREGAR / EDITAR TRABAJADOR ────────────────────────────────────────────
 function abrirAgregarW(){
   document.getElementById('modal').innerHTML=
     '<div class="modal-bg" onclick="cm()"><div class="modal-sheet" onclick="event.stopPropagation()">'+
@@ -548,7 +596,7 @@ function abrirAgregarW(){
 
 function updNWlbl(){
   var t=document.getElementById('nw-tp');
-  if(t)document.getElementById('nw-vlbl').textContent=t.value==='pct'?'Porcentaje (%)':'Monto (S/)';
+  if(t) document.getElementById('nw-vlbl').textContent=t.value==='pct'?'Porcentaje (%)':'Monto (S/)';
 }
 
 function guardarNW(){
@@ -556,7 +604,7 @@ function guardarNW(){
   var tp=document.getElementById('nw-tp').value;
   var v=parseFloat(document.getElementById('nw-v').value)||0;
   if(!n){alert('Escribe el nombre');return;}
-  if(!AC.ws)AC.ws=[];
+  if(!AC.ws) AC.ws=[];
   AC.ws.push({id:'w'+Date.now(),n:n,tp:tp,v:v});
   var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
   sv();cm();rDet();
@@ -596,9 +644,8 @@ function eliminarW(wid){
   sv();cm();rDet();
 }
 
-// ── REPARTO ────────────────────────────────────────────────────────────────
 function abrirReparto(){
-  if(!AC)return;
+  if(!AC) return;
   var c=calc(AC);
   var rep=AC.reparto||[];
   var disp=c.disp;
@@ -653,7 +700,7 @@ function abrirReparto(){
 
 function updRepLbl(){
   var t=document.getElementById('rep-tp');
-  if(t)document.getElementById('rep-vlbl').textContent=t.value==='pct'?'Porcentaje (%)':'Monto (S/)';
+  if(t) document.getElementById('rep-vlbl').textContent=t.value==='pct'?'Porcentaje (%)':'Monto (S/)';
 }
 
 function addRep(){
@@ -662,7 +709,7 @@ function addRep(){
   var v=parseFloat(document.getElementById('rep-v').value)||0;
   var rol=document.getElementById('rep-rol').value;
   if(!n){alert('Escribe el nombre');return;}
-  if(!AC.reparto)AC.reparto=[];
+  if(!AC.reparto) AC.reparto=[];
   AC.reparto.push({id:'r'+Date.now(),n:n,tp:tp,v:v,esYo:rol==='yo',esEmpresa:rol==='empresa'});
   var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
   sv();abrirReparto();
@@ -682,9 +729,9 @@ function delRep(rid){
 }
 
 function exportCSV(){
-  if(!AC)return;
+  if(!AC) return;
   var c=calc(AC),ws=AC.ws||[],rows=[];
-  var tipos={adelanto:'Adelanto',ingreso:'Pago final',obra:'Gasto obra',personal:'Gasto personal',pago:'Pago trabajador',fijo:'Gasto fijo'};
+  var tLabels={adelanto:'Adelanto',ingreso:'Pago final',obra:'Gasto obra',personal:'Gasto personal',pago:'Pago trabajador',fijo:'Gasto fijo'};
   rows.push(['RESUMEN','','','','']);
   rows.push(['Trabajo',AC.n,'','','']);
   rows.push(['Cliente/Nota',AC.nota||'','','','']);
@@ -708,16 +755,18 @@ function exportCSV(){
     });
     rows.push(['','','','','']);
   }
-  rows.push(['TRABAJADORES','Tipo pago','Corresponde','Cobró','Falta']);
+  rows.push(['TRABAJADORES','Tipo pago','Corresponde','Ya recibió (gastos+pagos)','Falta']);
   ws.forEach(function(w){
-    var pg=c.pg[w.id]||0,pp=c.pp[w.id]||0,debe=w.tp==='pct'?(c.disp*(w.v/100)):w.v;
-    rows.push([w.n,w.tp==='pct'?(w.v+'%'):('S/'+w.v),debe.toFixed(2),pg.toFixed(2),pp.toFixed(2)]);
+    var yaRecibio=(c.gp[w.id]||0)+(c.pg[w.id]||0);
+    var pp=c.pp[w.id]||0;
+    var debe=w.tp==='pct'?(c.disp*(w.v/100)):w.v;
+    rows.push([w.n,w.tp==='pct'?(w.v+'%'):('S/'+w.v),debe.toFixed(2),yaRecibio.toFixed(2),pp.toFixed(2)]);
   });
   rows.push(['','','','','']);
   rows.push(['MOVIMIENTOS','Tipo','Categoría','Persona','Monto','Fecha y hora']);
   AC.movs.forEach(function(m){
     var wn=(ws.find(function(w){return w.id===m.p;})||{n:''}).n;
-    rows.push([m.d,tipos[m.t]||m.t,m.cat||'',wn,m.m.toFixed(2),m.fh||'']);
+    rows.push([m.d,tLabels[m.t]||m.t,m.cat||'',wn,m.m.toFixed(2),m.fh||'']);
   });
   var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
@@ -727,7 +776,7 @@ function exportCSV(){
 }
 
 function rDet(){
-  if(!AC)return;
+  if(!AC) return;
   var t=AC,c=calc(t),ws=t.ws||[{id:'yo',n:'Yo',tp:'pct',v:100}];
   var clrs=['#007AFF','#34C759','#FF3B30','#5856D6','#FF9500'];
   var bgs=['#e8f0ff','#e8f8ed','#fff0f0','#f0eeff','#fff5e6'];
@@ -742,10 +791,12 @@ function rDet(){
 
   function mList(tipo){
     var l=t.movs.filter(function(m){return m.t===tipo;});
-    if(!l.length)return '<div style="font-size:12px;color:#888;padding:3px 0 8px;">Sin registros</div>';
+    if(!l.length) return '<div style="font-size:12px;color:#888;padding:3px 0 8px;">Sin registros</div>';
     return l.map(function(m){
-      var wn='';if(m.t==='personal'||m.t==='pago'){wn=(ws.find(function(w){return w.id===m.p;})||{n:'?'}).n;}
-      return '<div class="mr"><div class="mi" style="'+icB[m.t]+'font-size:15px;">'+icE[m.t]+'</div>'+
+      var wn='';
+      if(m.t==='personal'||m.t==='pago'){wn=(ws.find(function(w){return w.id===m.p;})||{n:'?'}).n;}
+      return '<div class="mr">'+
+        '<div class="mi" style="'+icB[m.t]+'font-size:15px;">'+icE[m.t]+'</div>'+
         '<div class="mf"><div class="md">'+m.d+'</div>'+
         '<div class="mm">'+(wn?wn+' · ':'')+( m.cat||'')+(m.fh?' · '+m.fh:'')+'</div></div>'+
         '<div class="ma" style="color:'+clrM[m.t]+';">'+sgn[m.t]+fm(m.m)+'</div>'+
@@ -754,7 +805,6 @@ function rDet(){
     }).join('');
   }
 
-  // RESUMEN TOTAL DE MOVIMIENTOS
   var resumenMovs=
     '<div class="mov-resumen">'+
       '<div class="mov-res-row"><span style="color:#34C759;">💵 Adelantos</span><span style="color:#34C759;">+'+fm(c.a)+'</span></div>'+
@@ -763,7 +813,8 @@ function rDet(){
       '<div class="mov-res-row"><span style="color:#FF6B35;">☕ Gastos personal</span><span style="color:#FF6B35;">-'+fm(c.tgp)+'</span></div>'+
       '<div class="mov-res-row"><span style="color:#5856D6;">💸 Pagos trabajadores</span><span style="color:#5856D6;">-'+fm(c.pagos)+'</span></div>'+
       (c.gf?'<div class="mov-res-row"><span style="color:#FF9500;">🏠 Gastos fijos</span><span style="color:#FF9500;">-'+fm(c.gf)+'</span></div>':'')+
-      '<div class="mov-res-row total"><span>'+(c.disp>=0?'💰':'⚠️')+' Disponible en caja</span><span style="color:'+(c.disp>=0?'#007AFF':'#FF3B30')+'">'+(c.disp<0?'-':'')+fm(c.disp)+'</span></div>'+
+      '<div class="mov-res-row total"><span>'+(c.disp>=0?'💰':'⚠️')+' Disponible en caja</span>'+
+      '<span style="color:'+(c.disp>=0?'#007AFF':'#FF3B30')+'">'+(c.disp<0?'-':'')+fm(c.disp)+'</span></div>'+
     '</div>';
 
   var rep=t.reparto||[];
@@ -810,7 +861,7 @@ function rDet(){
         '<span>'+fm(c.cob)+'</span> cobrado'+
         ' − <span>'+fm(c.o)+'</span> obra'+
         ' − <span>'+fm(c.tgp)+'</span> personal'+
-        ' − <span>'+fm(c.pagos)+'</span> pagado trabajadores'+
+        ' − <span>'+fm(c.pagos)+'</span> pagos trabajadores'+
         (c.gf?' − <span>'+fm(c.gf)+'</span> fijos':'')+
       '</div>'+
     '</div>'+
@@ -827,13 +878,19 @@ function rDet(){
     '</div>'+
       ws.map(function(w,i){
         var col=clrs[i%clrs.length],bg=bgs[i%bgs.length];
-        var gp=c.gp[w.id]||0,pg=c.pg[w.id]||0,pp=c.pp[w.id]||0;
+        var yaRecibio=(c.gp[w.id]||0)+(c.pg[w.id]||0);
         var debe=w.tp==='pct'?(c.disp*(w.v/100)):w.v;
-        return '<div class="tw"><div class="av" style="background:'+bg+';color:'+col+';">'+ini(w.n)+'</div>'+
-          '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;">'+w.n+' '+(w.tp==='pct'?'('+w.v+'%)':'(fijo S/'+w.v+')')+'</div>'+
-          '<div style="font-size:11px;color:#888;">Gasto: '+fm(gp)+' · Cobró: '+fm(pg)+'</div></div>'+
-          '<div style="text-align:right;flex-shrink:0;margin-right:6px;"><div style="font-size:13px;font-weight:600;color:'+col+';">'+fm(debe)+'</div>'+
-          '<div style="font-size:11px;color:'+(pp>0?'#FF3B30':'#34C759')+';">'+(pp>0?'Falta '+fm(pp):'Al día')+'</div></div>'+
+        var pp=c.pp[w.id]||0;
+        return '<div class="tw">'+
+          '<div class="av" style="background:'+bg+';color:'+col+';">'+ini(w.n)+'</div>'+
+          '<div style="flex:1;min-width:0;">'+
+            '<div style="font-size:13px;font-weight:600;">'+w.n+' '+(w.tp==='pct'?'('+w.v+'%)':'(S/'+w.v+' fijo)')+'</div>'+
+            '<div style="font-size:11px;color:#888;">Gastos: '+fm(c.gp[w.id]||0)+' · Pagado: '+fm(c.pg[w.id]||0)+' · Total recibido: '+fm(yaRecibio)+'</div>'+
+          '</div>'+
+          '<div style="text-align:right;flex-shrink:0;margin-right:6px;">'+
+            '<div style="font-size:13px;font-weight:600;color:'+col+';">'+fm(debe)+'</div>'+
+            '<div style="font-size:11px;color:'+(pp>0?'#FF3B30':'#34C759')+';">'+(pp>0?'Falta '+fm(pp):'✅ Al día')+'</div>'+
+          '</div>'+
           (t.est==='activo'?'<button class="tw-edit" onclick="editarW(\''+w.id+'\')">✏️</button>':'')+
         '</div>';
       }).join('')+
@@ -850,11 +907,14 @@ function rDet(){
         '<button class="tt" data-t="fijo" onclick="setMT(\'fijo\')">Fijo</button>'+
       '</div>'+
       '<div id="pw" style="display:none;" class="field"><label>¿Para quién?</label><select id="mper">'+wOpts+'</select></div>'+
-      '<div class="r2"><div class="field"><label>Categoría</label><select id="mc"><option>Yape</option><option>Efectivo</option><option>Transferencia</option></select></div>'+
-      '<div class="field"><label>Monto (S/)</label><input id="mm" type="number" placeholder="0.00" inputmode="decimal"/></div></div>'+
-      '<div class="field"><label>Descripción</label><input id="mdesc" placeholder="Ej: pasaje, cemento..." autocomplete="off"/></div>'+
-      '<button class="btn bb" onclick="addM()">+ Agregar</button></div>'+
-      (rep.length===0?'<button class="btn bteal" onclick="abrirReparto()" style="margin-bottom:6px;">💰 Definir reparto de ganancias</button>':''):
+      '<div class="r2">'+
+        '<div class="field"><label>Categoría</label><select id="mc">'+CATS.adelanto.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select></div>'+
+        '<div class="field"><label>Monto (S/)</label><input id="mm" type="number" placeholder="0.00" inputmode="decimal"/></div>'+
+      '</div>'+
+      '<div class="field"><label>Descripción (opcional)</label><input id="mdesc" placeholder="Ej: pasaje, cemento..." autocomplete="off"/></div>'+
+      '<button class="btn bb" onclick="addM()">+ Agregar</button>'+
+    '</div>'+
+    (rep.length===0?'<button class="btn bteal" onclick="abrirReparto()" style="margin-bottom:6px;">💰 Definir reparto de ganancias</button>':''):
     '<div class="card" style="text-align:center;font-size:14px;color:#888;padding:20px;">🔒 Trabajo cerrado — solo lectura</div>')+
     '<div class="card"><div class="ch">Movimientos</div>'+
       '<div class="ssep">Ingresos</div>'+mList('adelanto')+mList('ingreso')+
