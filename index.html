@@ -115,6 +115,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mov-res-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;}
 .mov-res-row.total{border-top:0.5px solid #e0e0e0;margin-top:6px;padding-top:8px;font-weight:700;font-size:15px;}
 .tw-edit{background:none;border:none;cursor:pointer;color:#007AFF;font-size:13px;font-weight:600;padding:4px 8px;flex-shrink:0;}
+.saldo-tag{font-size:10px;color:#888;margin-top:1px;}
+.saldo-pos{color:#0d9488;}
+.saldo-neg{color:#FF3B30;}
+.wf-wrap{margin-top:4px;}
+.wf-row{margin-bottom:10px;}
+.wf-lbl{display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:3px;}
+.wf-lbl b{font-weight:600;}
+.wf-track{position:relative;background:#f5f5f7;border-radius:6px;height:16px;overflow:hidden;}
+.wf-fill{position:absolute;top:0;height:100%;border-radius:6px;}
+.hl-worker{font-size:12px;color:#007AFF;font-weight:600;margin-top:4px;}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:500;z-index:200;box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;transition:opacity .25s;max-width:88%;text-align:center;}
+.backup-card{border:1px dashed #d0d0d0;}
 </style>
 </head>
 <body>
@@ -159,6 +171,10 @@ var CATS={
   pago:['Yape','Efectivo','Transferencia','Depósito'],
   fijo:['Agua','Luz','Gas','Internet','Alquiler','Otro']
 };
+// Etiquetas de tipo de movimiento, reutilizadas en varios lados
+var TLABELS={adelanto:'Adelanto',ingreso:'Pago final',obra:'Gasto obra',personal:'Gasto personal',pago:'Pago trabajador',fijo:'Gasto fijo'};
+// Signo de cada tipo de movimiento para calcular saldo acumulado
+var SIGNO={adelanto:1,ingreso:1,obra:-1,personal:-1,pago:-1,fijo:-1};
 
 function sv(){localStorage.setItem(DB,JSON.stringify({tj:TJ,fijos:FJ}));}
 function fm(n){return 'S/'+Math.abs(n).toFixed(2);}
@@ -168,6 +184,19 @@ function cm(){document.getElementById('modal').innerHTML='';}
 function fechaHoy(){var h=new Date();return h.getDate()+'/'+(h.getMonth()+1)+'/'+h.getFullYear();}
 function horaAhora(){var h=new Date();return h.getHours().toString().padStart(2,'0')+':'+h.getMinutes().toString().padStart(2,'0');}
 function fechaHora(){return fechaHoy()+' '+horaAhora();}
+
+// Toast de confirmación breve al guardar algo
+function toast(msg){
+  var t=document.createElement('div');
+  t.className='toast';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(function(){t.style.opacity='1';});
+  setTimeout(function(){
+    t.style.opacity='0';
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); },300);
+  },1900);
+}
 
 function calc(t){
   var a=0,i2=0,o=0,gp={},pg={},gf=0,pagos=0;
@@ -220,9 +249,44 @@ function calc(t){
     pc:t.total>0?(t.total-cob):0};
 }
 
+// Calcula el saldo en caja acumulado en el momento de cada movimiento (orden cronológico real)
+function saldoPorMov(t){
+  var movsChron=(t.movs||[]).slice().reverse(); // se guardan con unshift => reverse = orden cronológico
+  var running=0,map={};
+  movsChron.forEach(function(m){
+    running+=(SIGNO[m.t]||0)*m.m;
+    map[m.id]=running;
+  });
+  return map;
+}
+
 function br(lbl,val,mx,col,tc){
   var p=Math.round((Math.abs(val)/Math.max(Math.abs(mx),1))*100);
   return '<div class="bar"><div class="bl">'+lbl+'</div><div class="bt"><div class="bf" style="width:'+p+'%;background:'+col+';"></div></div><div class="bv" style="color:'+tc+';">'+fs(val)+'</div></div>';
+}
+
+// Gráfico de cascada: cobrado -> gastos -> disponible, más intuitivo que barras sueltas
+function waterfall(c){
+  var steps=[
+    {lbl:'Cobrado',from:0,to:c.cob,color:'#639922',tc:'#3b6d11'},
+    {lbl:'Gasto obra',from:c.cob,to:c.cob-c.o,color:'#E24B4A',tc:'#a32d2d'},
+    {lbl:'Gastos personal',from:c.cob-c.o,to:c.cob-c.o-c.tgp,color:'#E24B4A',tc:'#a32d2d'},
+    {lbl:'Gastos fijos',from:c.cob-c.o-c.tgp,to:c.cob-c.o-c.tgp-c.gf,color:'#E24B4A',tc:'#a32d2d'},
+    {lbl:'Pagos trabajadores',from:c.cob-c.o-c.tgp-c.gf,to:c.disp,color:'#E24B4A',tc:'#a32d2d'},
+    {lbl:'Disponible',from:0,to:c.disp,color:'#378ADD',tc:'#185fa5'}
+  ];
+  var max=Math.max(Math.abs(c.cob),Math.abs(c.disp),1);
+  var html='<div class="wf-wrap">';
+  steps.forEach(function(s){
+    var lo=Math.min(s.from,s.to),hi=Math.max(s.from,s.to);
+    var leftPct=Math.max(0,Math.min(100,(lo/max)*100));
+    var widthPct=Math.max(1,Math.min(100-leftPct,((hi-lo)/max)*100));
+    var amt=s.to-s.from;
+    html+='<div class="wf-row"><div class="wf-lbl"><span>'+s.lbl+'</span><b style="color:'+s.tc+';">'+(amt<0?'-':(s.lbl==='Cobrado'||s.lbl==='Disponible'?'':'-'))+fm(amt)+'</b></div>'+
+      '<div class="wf-track"><div class="wf-fill" style="left:'+leftPct+'%;width:'+widthPct+'%;background:'+s.color+';"></div></div></div>';
+  });
+  html+='</div>';
+  return html;
 }
 
 function go(s){
@@ -326,13 +390,26 @@ function rRes(){
 function rList(){
   var el=document.getElementById('s-trab');
   if(!TJ.length){el.innerHTML='<div class="empty">Sin trabajos aún.</div>';return;}
-  el.innerHTML='<div class="card">'+TJ.map(function(t){var c=calc(t);
+  el.innerHTML=
+    '<div class="field" style="margin-bottom:10px;"><input id="buscarT" placeholder="🔍 Buscar trabajo o cliente..." oninput="filtrarTrabajos()" autocomplete="off"/></div>'+
+    '<div class="card" id="listaTrab">'+trabajosHTML(TJ)+'</div>';
+}
+function trabajosHTML(arr){
+  if(!arr.length) return '<div class="empty">Sin resultados.</div>';
+  return arr.map(function(t){var c=calc(t);
     return '<div class="mr" onclick="det('+t.id+')" style="cursor:pointer;">'+
       '<div style="width:34px;height:34px;border-radius:10px;background:#e8f0ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">💼</div>'+
       '<div class="mf"><div class="md">'+t.n+'<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+(t.est==='activo'?'Activo':'Cerrado')+'</span></div>'+
       '<div class="mm">'+t.f+(t.fcierre?' → '+t.fcierre:'')+' · '+(t.ws||[]).map(function(w){return w.n;}).join(', ')+'</div></div>'+
       '<div class="ma" style="color:#5856D6;">'+fm(c.mp)+'</div></div>';
-  }).join('')+'</div>';
+  }).join('');
+}
+function filtrarTrabajos(){
+  var q=(document.getElementById('buscarT').value||'').toLowerCase().trim();
+  var filtrado=!q?TJ:TJ.filter(function(t){
+    return (t.n||'').toLowerCase().indexOf(q)>-1||(t.nota||'').toLowerCase().indexOf(q)>-1;
+  });
+  document.getElementById('listaTrab').innerHTML=trabajosHTML(filtrado);
 }
 
 function rNew(){
@@ -429,6 +506,13 @@ function rFijos(){
             '<button class="ib" onclick="delFijo('+f.id+')" style="color:#FF3B30;">🗑</button></div>';
         }).join('')||'<div style="font-size:12px;color:#888;padding:4px 0;">Sin registros</div>')
       :'<div class="empty">Sin gastos fijos aún.</div>')+
+    '</div>'+
+    '<div class="card backup-card"><div class="ch">💾 Backup de datos</div>'+
+      '<div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.5;">Tus datos viven solo en este navegador. Exportá un backup para guardarlo en Drive o pasarlo a otro dispositivo (teléfono ↔ laptop).</div>'+
+      '<button class="btn bteal" onclick="exportBackup()">📤 Exportar backup completo</button>'+
+      '<input type="file" id="backup-file" accept="application/json,.json" style="display:none;" onchange="importBackupFile(this)"/>'+
+      '<button class="btn bk" onclick="document.getElementById(\'backup-file\').click();">📥 Importar backup</button>'+
+      '<div class="hint">Importar REEMPLAZA todos los datos actuales de este dispositivo por los del archivo.</div>'+
     '</div>';
 }
 
@@ -443,9 +527,44 @@ function addFijo(){
   var ahora=new Date();
   FJ.unshift({id:Date.now(),tipo:document.getElementById('fj-tipo').value,cat:document.getElementById('fj-cat').value,desc:document.getElementById('fj-d').value.trim(),m:m,ts:ahora.getTime(),fecha:fechaHora()});
   sv();document.getElementById('fj-m').value='';document.getElementById('fj-d').value='';rFijos();
+  toast('✓ Gasto fijo registrado');
 }
 
 function delFijo(id){FJ=FJ.filter(function(f){return f.id!==id;});sv();rFijos();}
+
+// ===== BACKUP =====
+function exportBackup(){
+  var data=localStorage.getItem(DB)||'{"tj":[],"fijos":[]}';
+  var blob=new Blob([data],{type:'application/json'});
+  var url=URL.createObjectURL(blob),a=document.createElement('a');
+  var fecha=fechaHoy().replace(/\//g,'-');
+  a.href=url;a.download='micaja-backup-'+fecha+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('✓ Backup descargado');
+}
+
+function importBackupFile(input){
+  var file=input.files&&input.files[0];
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var parsed;
+    try{ parsed=JSON.parse(e.target.result); }
+    catch(err){ alert('El archivo no es un backup válido de Mi Caja.'); input.value=''; return; }
+    if(!parsed||!Array.isArray(parsed.tj)||!Array.isArray(parsed.fijos)){
+      alert('El archivo no tiene el formato esperado de Mi Caja.'); input.value=''; return;
+    }
+    if(!confirm('Esto va a REEMPLAZAR todos los datos actuales de este dispositivo por los del backup. ¿Continuar?')){
+      input.value=''; return;
+    }
+    DATA=parsed; TJ=DATA.tj; FJ=DATA.fijos; sv();
+    input.value='';
+    alert('✓ Backup importado correctamente.');
+    go('res');
+  };
+  reader.onerror=function(){ alert('No se pudo leer el archivo.'); input.value=''; };
+  reader.readAsText(file);
+}
 
 function det(id){
   AC=TJ.find(function(t){return t.id===id;});
@@ -456,35 +575,46 @@ function det(id){
   MT='adelanto';rDet();
 }
 
-// CORREGIDO: setMT ahora actualiza categorías de forma limpia usando objeto CATS
+// setMT actualiza SIEMPRE juntos: pestaña visual, categorías y visibilidad del selector de persona,
+// para que nunca quede desfasado el tipo mostrado del tipo que realmente se va a guardar (bug corregido)
 function setMT(tp){
   MT=tp;
   var cls={adelanto:'ta',ingreso:'ti2',obra:'to',personal:'tp',pago:'tpg',fijo:'tfx'};
   document.querySelectorAll('.tt').forEach(function(b){
     b.className='tt'+(b.dataset.t===tp?' '+cls[tp]:'');
   });
-  // mostrar/ocultar selector de persona
   var pw=document.getElementById('pw');
   if(pw) pw.style.display=(tp==='personal'||tp==='pago')?'block':'none';
-  // actualizar categorías desde objeto fijo — sin ambigüedad
   var cat=document.getElementById('mc');
-  if(!cat) return;
-  var opts=CATS[tp]||['Otro'];
-  cat.innerHTML=opts.map(function(c){return '<option>'+c+'</option>';}).join('');
+  if(cat){
+    var opts=CATS[tp]||['Otro'];
+    cat.innerHTML=opts.map(function(c){return '<option>'+c+'</option>';}).join('');
+  }
+  if(pw&&pw.style.display==='block') highlightWorker();
+}
+
+// Resalta visualmente a quién le corresponde el gasto/pago (evita mezclar personas)
+function highlightWorker(){
+  var sel=document.getElementById('mper');
+  var lbl=document.getElementById('mper-hl');
+  if(sel&&lbl&&sel.selectedIndex>-1){
+    lbl.textContent='→ Este movimiento es de: '+sel.options[sel.selectedIndex].text;
+  }
 }
 
 function addM(){
   if(!AC) return;
   var m=parseFloat(document.getElementById('mm').value);
   if(!m||m<=0){alert('Ingresa un monto');return;}
-  // guardar tipo del movimiento desde MT (variable global), NO desde el selector
+  // guardar tipo del movimiento desde MT (variable global), siempre sincronizada con lo visible
   var cat=document.getElementById('mc').value;
   var desc=document.getElementById('mdesc').value.trim()||cat;
   var pe=document.getElementById('mper');
   var persona=pe?pe.value:'yo';
+  var tipoGuardado=MT;
   AC.movs.unshift({
     id:Date.now(),
-    t:MT,          // tipo siempre viene de MT, nunca de la categoría
+    t:tipoGuardado,
     m:m,
     cat:cat,
     d:desc,
@@ -497,15 +627,20 @@ function addM(){
   document.getElementById('mm').value='';
   document.getElementById('mdesc').value='';
   rDet();
+  var wn='';
+  if((tipoGuardado==='personal'||tipoGuardado==='pago')){
+    var w=(AC.ws||[]).find(function(x){return x.id===persona;});
+    wn=w?(' · '+w.n):'';
+  }
+  toast('✓ '+TLABELS[tipoGuardado]+' · '+cat+' · '+fm(m)+wn);
 }
 
 function showEdit(mid){
   var mv=AC.movs.find(function(x){return x.id===mid;});if(!mv)return;
   var ws=AC.ws||[];
   var wOpts=ws.map(function(w){return '<option value="'+w.id+'"'+(mv.p===w.id?' selected':'')+'>'+w.n+'</option>';}).join('');
-  var tLabels={adelanto:'Adelanto',ingreso:'Pago final',obra:'Gasto obra',personal:'Gasto personal',pago:'Pago trabajador',fijo:'Gasto fijo'};
-  var tOpts=Object.keys(tLabels).map(function(tp){
-    return '<option value="'+tp+'"'+(mv.t===tp?' selected':'')+'>'+tLabels[tp]+'</option>';
+  var tOpts=Object.keys(TLABELS).map(function(tp){
+    return '<option value="'+tp+'"'+(mv.t===tp?' selected':'')+'>'+TLABELS[tp]+'</option>';
   }).join('');
   // cats del tipo actual
   var catOpts=(CATS[mv.t]||['Otro']).map(function(c){
@@ -518,7 +653,8 @@ function showEdit(mid){
     '<div class="field"><label>Categoría</label><select id="ecat">'+catOpts+'</select></div>'+
     '<div class="field"><label>Descripción</label><input id="ed" value="'+mv.d+'" autocomplete="off"/></div>'+
     '<div class="r2"><div class="field"><label>Monto (S/)</label><input id="em" type="number" value="'+mv.m+'" inputmode="decimal"/></div>'+
-    '<div class="field"><label>¿Para quién?</label><select id="ep">'+wOpts+'</select></div></div>'+
+    '<div class="field"><label>¿Para quién?</label><select id="ep" onchange="document.getElementById(\'ep-hl\').textContent=\'→ \'+this.options[this.selectedIndex].text;">'+wOpts+'</select></div></div>'+
+    '<div id="ep-hl" class="hl-worker">→ '+(ws.find(function(w){return w.id===mv.p;})||{n:''}).n+'</div>'+
     '<div class="modal-actions"><button class="mc" onclick="cm()">Cancelar</button><button class="ms" onclick="saveEdit('+mid+')">Guardar</button></div>'+
     '</div></div>';
 }
@@ -538,6 +674,7 @@ function saveEdit(mid){
   mv.p=document.getElementById('ep').value;
   var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
   sv();cm();rDet();
+  toast('✓ Movimiento actualizado');
 }
 
 function confDel(mid){
@@ -608,6 +745,7 @@ function guardarNW(){
   AC.ws.push({id:'w'+Date.now(),n:n,tp:tp,v:v});
   var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
   sv();cm();rDet();
+  toast('✓ Trabajador agregado: '+n);
 }
 
 function editarW(wid){
@@ -728,10 +866,28 @@ function delRep(rid){
   sv();abrirReparto();
 }
 
+// Editar total acordado desde el detalle
+function editarTotal(){
+  if(!AC) return;
+  document.getElementById('modal').innerHTML=
+    '<div class="modal-bg" onclick="cm()"><div class="modal-sheet" onclick="event.stopPropagation()">'+
+    '<div class="modal-handle"></div><div class="modal-title">💰 Total acordado</div>'+
+    '<div class="field"><label>Total acordado (S/)</label><input id="et-total" type="number" value="'+(AC.total||0)+'" inputmode="decimal"/></div>'+
+    '<div class="hint">Dejalo en 0 si todavía no hay un monto acordado con el cliente.</div>'+
+    '<div class="modal-actions"><button class="mc" onclick="cm()">Cancelar</button><button class="ms" onclick="guardarTotal()">Guardar</button></div>'+
+    '</div></div>';
+}
+function guardarTotal(){
+  AC.total=parseFloat(document.getElementById('et-total').value)||0;
+  var idx=TJ.findIndex(function(t){return t.id===AC.id;});if(idx>-1)TJ[idx]=AC;
+  sv();cm();rDet();
+  toast('✓ Total acordado actualizado');
+}
+
 function exportCSV(){
   if(!AC) return;
   var c=calc(AC),ws=AC.ws||[],rows=[];
-  var tLabels={adelanto:'Adelanto',ingreso:'Pago final',obra:'Gasto obra',personal:'Gasto personal',pago:'Pago trabajador',fijo:'Gasto fijo'};
+  var saldoMap=saldoPorMov(AC);
   rows.push(['RESUMEN','','','','']);
   rows.push(['Trabajo',AC.n,'','','']);
   rows.push(['Cliente/Nota',AC.nota||'','','','']);
@@ -762,17 +918,48 @@ function exportCSV(){
     var debe=w.tp==='pct'?(c.disp*(w.v/100)):w.v;
     rows.push([w.n,w.tp==='pct'?(w.v+'%'):('S/'+w.v),debe.toFixed(2),yaRecibio.toFixed(2),pp.toFixed(2)]);
   });
-  rows.push(['','','','','']);
-  rows.push(['MOVIMIENTOS','Tipo','Categoría','Persona','Monto','Fecha y hora']);
+  rows.push(['','','','','','']);
+  rows.push(['MOVIMIENTOS','Tipo','Categoría','Persona','Monto','Fecha y hora','Saldo en caja']);
   AC.movs.forEach(function(m){
     var wn=(ws.find(function(w){return w.id===m.p;})||{n:''}).n;
-    rows.push([m.d,tLabels[m.t]||m.t,m.cat||'',wn,m.m.toFixed(2),m.fh||'']);
+    rows.push([m.d,TLABELS[m.t]||m.t,m.cat||'',wn,m.m.toFixed(2),m.fh||'',(saldoMap[m.id]!==undefined?saldoMap[m.id].toFixed(2):'')]);
   });
   var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   var url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download=(AC.n||'trabajo').replace(/[^a-z0-9]/gi,'-')+'.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// Vista de historial unificado, ordenado por fecha real (más reciente primero)
+function toggleHistFecha(){
+  var el=document.getElementById('histfecha-body');
+  if(!el) return;
+  var visible=el.style.display!=='none';
+  el.style.display=visible?'none':'block';
+  document.getElementById('histfecha-toggle').textContent=visible?'📅 Ver historial por fecha':'📅 Ocultar historial por fecha';
+  if(!visible) el.innerHTML=histFechaHTML(AC);
+}
+function histFechaHTML(t){
+  var ws=t.ws||[];
+  var saldoMap=saldoPorMov(t);
+  var icE={adelanto:'💵',ingreso:'✅',obra:'🔧',personal:'☕',pago:'💸',fijo:'🏠'};
+  var sgn={adelanto:'+',ingreso:'+',obra:'-',personal:'-',pago:'-',fijo:'-'};
+  var clrM={adelanto:'#34C759',ingreso:'#28a745',obra:'#FF3B30',personal:'#FF6B35',pago:'#5856D6',fijo:'#FF9500'};
+  // orden cronológico real por fecha/hora; más reciente primero (los movs ya vienen así por el unshift)
+  var lista=(t.movs||[]);
+  if(!lista.length) return '<div class="empty">Sin movimientos aún.</div>';
+  return lista.map(function(m){
+    var wn=(m.t==='personal'||m.t==='pago')?(ws.find(function(w){return w.id===m.p;})||{n:'?'}).n:'';
+    var saldo=saldoMap[m.id]||0;
+    return '<div class="mr">'+
+      '<div class="mi" style="font-size:15px;">'+icE[m.t]+'</div>'+
+      '<div class="mf"><div class="md">'+m.d+' <span class="badge bc" style="margin-left:4px;">'+TLABELS[m.t]+'</span></div>'+
+      '<div class="mm">'+(wn?wn+' · ':'')+(m.cat||'')+(m.fh?' · '+m.fh:'')+'</div>'+
+      '<div class="saldo-tag '+(saldo<0?'saldo-neg':'saldo-pos')+'">Caja en ese momento: '+(saldo<0?'-':'')+fm(saldo)+'</div></div>'+
+      '<div class="ma" style="color:'+clrM[m.t]+';">'+sgn[m.t]+fm(m.m)+'</div>'+
+    '</div>';
+  }).join('');
 }
 
 function rDet(){
@@ -788,6 +975,14 @@ function rDet(){
   var wOpts=ws.map(function(w){return '<option value="'+w.id+'">'+w.n+'</option>';}).join('');
   var dispClass=c.disp>0?'positivo':c.disp<0?'negativo':'cero';
   var dispIcon=c.disp>0?'💰':c.disp<0?'⚠️':'➖';
+  var saldoMap=saldoPorMov(t);
+
+  // Alerta: el disponible no alcanza para pagar a todos los trabajadores
+  var totalFalta=Object.values(c.pp||{}).reduce(function(a,b){return a+b;},0);
+  var alertaPagoHtml='';
+  if(t.est==='activo'&&totalFalta>0&&c.disp<totalFalta){
+    alertaPagoHtml='<div class="alert-box">⚠️ El disponible no alcanza para pagar a todos: falta '+fm(totalFalta-Math.max(0,c.disp))+'</div>';
+  }
 
   function mList(tipo){
     var l=t.movs.filter(function(m){return m.t===tipo;});
@@ -795,10 +990,12 @@ function rDet(){
     return l.map(function(m){
       var wn='';
       if(m.t==='personal'||m.t==='pago'){wn=(ws.find(function(w){return w.id===m.p;})||{n:'?'}).n;}
+      var saldo=saldoMap[m.id]||0;
       return '<div class="mr">'+
         '<div class="mi" style="'+icB[m.t]+'font-size:15px;">'+icE[m.t]+'</div>'+
         '<div class="mf"><div class="md">'+m.d+'</div>'+
-        '<div class="mm">'+(wn?wn+' · ':'')+( m.cat||'')+(m.fh?' · '+m.fh:'')+'</div></div>'+
+        '<div class="mm">'+(wn?wn+' · ':'')+( m.cat||'')+(m.fh?' · '+m.fh:'')+'</div>'+
+        '<div class="saldo-tag '+(saldo<0?'saldo-neg':'saldo-pos')+'">Caja en ese momento: '+(saldo<0?'-':'')+fm(saldo)+'</div></div>'+
         '<div class="ma" style="color:'+clrM[m.t]+';">'+sgn[m.t]+fm(m.m)+'</div>'+
         (t.est==='activo'?'<div class="mbtns"><button class="ib" onclick="showEdit('+m.id+')" style="color:#007AFF;">✏️</button><button class="ib" onclick="confDel('+m.id+')" style="color:#FF3B30;">🗑</button></div>':'')+
       '</div>';
@@ -841,10 +1038,12 @@ function rDet(){
       '<div style="font-size:20px;font-weight:700;">'+t.n+'</div>'+
       '<span class="badge '+(t.est==='activo'?'ba':'bc')+'">'+(t.est==='activo'?'Activo':'Cerrado')+'</span>'+
     '</div>'+
+    alertaPagoHtml+
     '<div class="card"><div class="ch">Info del trabajo</div>'+
       '<div class="info-row"><span class="info-lbl">📅 Inicio</span><span>'+t.f+'</span></div>'+
       (t.fcierre?'<div class="info-row"><span class="info-lbl">🔒 Cierre</span><span>'+t.fcierre+'</span></div>':'')+
-      (t.total?'<div class="info-row"><span class="info-lbl">💰 Total acordado</span><span>'+fm(t.total)+'</span></div>':'')+
+      '<div class="info-row"><span class="info-lbl">💰 Total acordado</span><span>'+(t.total?fm(t.total):'No definido')+
+        (t.est==='activo'?' <button class="tw-edit" onclick="editarTotal()" style="padding:0 0 0 6px;">✏️</button>':'')+'</span></div>'+
       (t.nota?'<div class="info-row"><span class="info-lbl">📋 Cliente/Nota</span><span>'+t.nota+'</span></div>':'')+
       '<div class="info-row"><span class="info-lbl">👥 Equipo</span><span>'+(t.ws||[]).map(function(w){return w.n;}).join(', ')+'</span></div>'+
     '</div>'+
@@ -865,13 +1064,8 @@ function rDet(){
         (c.gf?' − <span>'+fm(c.gf)+'</span> fijos':'')+
       '</div>'+
     '</div>'+
-    '<div class="card"><div class="ch">Desglose</div>'+
-      br('Cobrado',c.cob,mx,'#34C759','#28a745')+
-      br('Mi parte',c.mp,mx,'#5856D6','#3634A3')+
-      br('Gasto obra',c.o,mx,'#FF3B30','#cc2200')+
-      br('Gasto pers.',c.tgp,mx,'#FF9500','#cc7700')+
-      br('Pagos trab.',c.pagos,mx,'#5856D6','#3634A3')+
-      (c.gf?br('Gasto fijo',c.gf,mx,'#BA7517','#854F0B'):'')+
+    '<div class="card"><div class="ch">Flujo de caja</div>'+
+      waterfall(c)+
     '</div>'+
     '<div class="card"><div class="ch">Trabajadores '+
       (t.est==='activo'?'<button class="tw-edit" onclick="abrirAgregarW()">+ Agregar</button>':'')+
@@ -899,16 +1093,16 @@ function rDet(){
     (t.est==='activo'?
     '<div class="card"><div class="ch">Registrar movimiento</div>'+
       '<div class="ttabs">'+
-        '<button class="tt ta" data-t="adelanto" onclick="setMT(\'adelanto\')">Adelanto</button>'+
-        '<button class="tt" data-t="ingreso" onclick="setMT(\'ingreso\')">Pago final</button>'+
-        '<button class="tt" data-t="obra" onclick="setMT(\'obra\')">Gasto obra</button>'+
-        '<button class="tt" data-t="personal" onclick="setMT(\'personal\')">Personal</button>'+
-        '<button class="tt" data-t="pago" onclick="setMT(\'pago\')">Pagar</button>'+
-        '<button class="tt" data-t="fijo" onclick="setMT(\'fijo\')">Fijo</button>'+
+        '<button class="tt '+(MT==='adelanto'?'ta':'')+'" data-t="adelanto" onclick="setMT(\'adelanto\')">Adelanto</button>'+
+        '<button class="tt '+(MT==='ingreso'?'ti2':'')+'" data-t="ingreso" onclick="setMT(\'ingreso\')">Pago final</button>'+
+        '<button class="tt '+(MT==='obra'?'to':'')+'" data-t="obra" onclick="setMT(\'obra\')">Gasto obra</button>'+
+        '<button class="tt '+(MT==='personal'?'tp':'')+'" data-t="personal" onclick="setMT(\'personal\')">Personal</button>'+
+        '<button class="tt '+(MT==='pago'?'tpg':'')+'" data-t="pago" onclick="setMT(\'pago\')">Pagar</button>'+
+        '<button class="tt '+(MT==='fijo'?'tfx':'')+'" data-t="fijo" onclick="setMT(\'fijo\')">Fijo</button>'+
       '</div>'+
-      '<div id="pw" style="display:none;" class="field"><label>¿Para quién?</label><select id="mper">'+wOpts+'</select></div>'+
+      '<div id="pw" style="display:'+((MT==='personal'||MT==='pago')?'block':'none')+';" class="field"><label>¿Para quién?</label><select id="mper" onchange="highlightWorker()">'+wOpts+'</select><div id="mper-hl" class="hl-worker"></div></div>'+
       '<div class="r2">'+
-        '<div class="field"><label>Categoría</label><select id="mc">'+CATS.adelanto.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select></div>'+
+        '<div class="field"><label>Categoría</label><select id="mc">'+(CATS[MT]||['Otro']).map(function(c){return '<option>'+c+'</option>';}).join('')+'</select></div>'+
         '<div class="field"><label>Monto (S/)</label><input id="mm" type="number" placeholder="0.00" inputmode="decimal"/></div>'+
       '</div>'+
       '<div class="field"><label>Descripción (opcional)</label><input id="mdesc" placeholder="Ej: pasaje, cemento..." autocomplete="off"/></div>'+
@@ -924,6 +1118,8 @@ function rDet(){
       '<div class="ssep">Gastos fijos</div>'+mList('fijo')+
       resumenMovs+
     '</div>'+
+    '<button class="btn bk" id="histfecha-toggle" onclick="toggleHistFecha()" style="margin-bottom:6px;">📅 Ver historial por fecha</button>'+
+    '<div class="card" id="histfecha-body" style="display:none;"></div>'+
     '<button class="btn bcsv" onclick="exportCSV()" style="margin-bottom:6px;">📥 Descargar CSV</button>'+
     '<div class="hint">Descarga → abre con Hojas de cálculo de Google</div>'+
     (t.est==='activo'?'<button class="btn bk" onclick="confCerrar()" style="margin-bottom:6px;margin-top:10px;">🔒 Cerrar trabajo</button>':'')+
