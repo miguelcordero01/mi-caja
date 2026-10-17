@@ -127,6 +127,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .hl-worker{font-size:12px;color:#007AFF;font-weight:600;margin-top:4px;}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:500;z-index:200;box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;transition:opacity .25s;max-width:88%;text-align:center;}
 .backup-card{border:1px dashed #d0d0d0;}
+.pr-note{font-size:12px;color:#777;line-height:1.5;margin:7px 0}.pr-pill{display:inline-block;padding:4px 9px;border-radius:20px;background:#edf4ff;color:#1769aa;font-size:11px;font-weight:600}.pr-item{padding:11px 0;border-bottom:1px solid #eee}.pr-item:last-child{border:0}.pr-actions{display:flex;gap:8px;flex-wrap:wrap}.pr-actions .btn{flex:1;min-width:105px;font-size:12px;padding:10px}.pr-total{font-size:24px;font-weight:700;color:#007aff}.pr-box{background:#f5f5f7;border-radius:10px;padding:12px;margin:10px 0}.pr-small{font-size:11px;color:#777}.pr-row{display:flex;justify-content:space-between;gap:10px;align-items:center}.pr-row b{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -138,6 +139,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div id="s-trab" class="sc"></div>
 <div id="s-fijos" class="sc"></div>
 <div id="s-new" class="sc"></div>
+<div id="s-pres" class="sc"></div>
 <div id="s-det" class="sc"></div>
 <div id="modal"></div>
 <nav class="bottomnav">
@@ -145,12 +147,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <button class="bnb" onclick="go('trab')"><span class="bni">💼</span><span class="bnl">Trabajos</span></button>
   <button class="bnb" onclick="go('fijos')"><span class="bni">🏠</span><span class="bnl">Fijos</span></button>
   <button class="bnb" onclick="go('new')"><span class="bni">➕</span><span class="bnl">Nuevo</span></button>
+  <button class="bnb" onclick="go('pres')"><span class="bni">📐</span><span class="bnl">Presup.</span></button>
 </nav>
 <script>
 var DB='micaja_v2';
 var DATA=JSON.parse(localStorage.getItem(DB)||'{"tj":[],"fijos":[]}');
-if(!DATA.tj)DATA.tj=[];if(!DATA.fijos)DATA.fijos=[];
-var TJ=DATA.tj,FJ=DATA.fijos;
+if(!DATA.tj)DATA.tj=[];if(!DATA.fijos)DATA.fijos=[];if(!Array.isArray(DATA.presupuestos))DATA.presupuestos=[];
+var TJ=DATA.tj,FJ=DATA.fijos,PR=DATA.presupuestos;
 var AC=null,MT='adelanto',NW=[];
 var hoy=new Date();
 var MFILTRO={y:hoy.getFullYear(),m:hoy.getMonth()};
@@ -176,7 +179,7 @@ var TLABELS={adelanto:'Adelanto',ingreso:'Pago final',obra:'Gasto obra',personal
 // Signo de cada tipo de movimiento para calcular saldo acumulado
 var SIGNO={adelanto:1,ingreso:1,obra:-1,personal:-1,pago:-1,fijo:-1};
 
-function sv(){localStorage.setItem(DB,JSON.stringify({tj:TJ,fijos:FJ}));}
+function sv(){localStorage.setItem(DB,JSON.stringify({tj:TJ,fijos:FJ,presupuestos:PR}));}
 function fm(n){return 'S/'+Math.abs(n).toFixed(2);}
 function fs(n){return 'S/'+Math.abs(Math.round(n));}
 function ini(n){var p=(n||'?').trim().split(' ');return(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase();}
@@ -291,9 +294,9 @@ function waterfall(c){
 
 function go(s){
   document.querySelectorAll('.sc').forEach(function(x){x.className='sc';});
-  document.querySelectorAll('.bnb').forEach(function(b,i){b.className='bnb'+(['res','trab','fijos','new'][i]===s?' on':'');});
+  document.querySelectorAll('.bnb').forEach(function(b,i){b.className='bnb'+(['res','trab','fijos','new','pres'][i]===s?' on':'');});
   document.getElementById('s-'+s).className='sc on';
-  if(s==='res')rRes();if(s==='trab')rList();if(s==='fijos')rFijos();if(s==='new')rNew();
+  if(s==='res')rRes();if(s==='trab')rList();if(s==='fijos')rFijos();if(s==='new')rNew();if(s==='pres')rPres();
 }
 
 function cambiarMes(delta){
@@ -557,7 +560,7 @@ function importBackupFile(input){
     if(!confirm('Esto va a REEMPLAZAR todos los datos actuales de este dispositivo por los del backup. ¿Continuar?')){
       input.value=''; return;
     }
-    DATA=parsed; TJ=DATA.tj; FJ=DATA.fijos; sv();
+    DATA=parsed; TJ=DATA.tj; FJ=DATA.fijos; PR=Array.isArray(DATA.presupuestos)?DATA.presupuestos:[]; sv();
     input.value='';
     alert('✓ Backup importado correctamente.');
     go('res');
@@ -1125,6 +1128,57 @@ function rDet(){
     (t.est==='activo'?'<button class="btn bk" onclick="confCerrar()" style="margin-bottom:6px;margin-top:10px;">🔒 Cerrar trabajo</button>':'')+
     '<button class="btn br" onclick="confDelT()" style="margin-bottom:30px;margin-top:4px;">🗑 Eliminar trabajo</button>';
 }
+
+// ===== MI CAJA V8: PRESUPUESTOS =====
+// Las tarifas son solo mano de obra; los rendimientos no se presumen.
+var PR_TARIFAS={mate:{A1:20,A2:17,A3:16},satinado:{A1:22,A2:20}};
+var PR_PROT=[{id:'kraft',n:'Papel kraft (medida por confirmar)',an:0.5,la:45,precio:23},{id:'bolsa1',n:'Bolsa azul 1 × 1 m',an:1,la:1,precio:3},{id:'bolsa15',n:'Bolsa azul 1.5 × 1 m',an:1.5,la:1,precio:5},{id:'carton',n:'Cartón corrugado 1.2 × 7.5 m',an:1.2,la:7.5,precio:65.9}];
+var PR_ACT=null;
+function prEsc(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function prNum(x){return Math.max(0,Number(x)||0);}
+function prF(x){return 'S/ '+(Number(x)||0).toFixed(2);}
+function prId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function prById(id){return PR.find(function(p){return p.id===id;});}
+function prArea(a){if(a.manual!==null&&a.manual!==undefined&&a.manual!=='')return prNum(a.manual);var l=prNum(a.largo),w=prNum(a.ancho),h=prNum(a.alto);var per=2*(l+w);var bruto=a.tipo==='paredes'?per*h:l*w;return Math.max(0,bruto-prNum(a.huecos));}
+function prTarifa(a){return prNum(a.tarifa);}
+function prImporte(a){return prArea(a)*prTarifa(a);}
+function prTot(p){return (p.areas||[]).reduce(function(t,a){return t+prImporte(a);},0);}
+function prProtecTot(p){return (p.protecciones||[]).reduce(function(t,z){return t+Math.ceil(prNum(z.m2)/(prNum(z.an)*prNum(z.la)||1))*prNum(z.precio);},0);}
+function prMatTot(p){return (p.materiales||[]).reduce(function(t,m){return t+prNum(m.cantidad)*prNum(m.precio);},0);}
+function rPres(){
+ var e=document.getElementById('s-pres');
+ if(PR_ACT&&prById(PR_ACT)){prDetalle(PR_ACT);return;}
+ PR_ACT=null;
+ e.innerHTML='<div class="card"><div class="ch">📐 Presupuestos de obra</div><div class="pr-note">Metrados, acabados y cotizaciones. No modifica los movimientos de caja hasta que registres uno en Trabajos.</div><div class="field"><label>Nombre del proyecto</label><input id="pr-nombre" placeholder="Ej.: Colegio San Martín" maxlength="100"></div><div class="field"><label>Tipo de proyecto</label><select id="pr-tipo"><option>Casa</option><option>Oficina</option><option>Colegio</option><option>Local comercial</option><option>Otro</option></select></div><button class="btn bb" onclick="prNuevo()">+ Crear presupuesto</button></div>'+
+ (PR.length?PR.map(function(p){return '<div class="card"><div class="pr-row"><div><b>'+prEsc(p.nombre)+'</b><div class="pr-small">'+prEsc(p.tipo)+' · '+(p.areas||[]).length+' partidas</div></div><b>'+prF(prTot(p))+'</b></div><div class="pr-actions"><button class="btn bk" onclick="prAbrir(\''+p.id+'\')">Abrir</button><button class="btn br" onclick="prEliminar(\''+p.id+'\')">Eliminar</button></div></div>';}).join(''):'<div class="card empty">Aún no hay presupuestos.</div>');
+}
+function prNuevo(){var n=document.getElementById('pr-nombre').value.trim();if(!n){alert('Ingresa el nombre del proyecto');return;}var p={id:prId(),nombre:n,tipo:document.getElementById('pr-tipo').value,areas:[],protecciones:[],materiales:[],fecha:fechaHoy()};PR.unshift(p);sv();prAbrir(p.id);toast('✓ Presupuesto creado');}
+function prAbrir(id){PR_ACT=id;prDetalle(id);}
+function prVolver(){PR_ACT=null;rPres();}
+function prEliminar(id){if(!confirm('¿Eliminar este presupuesto y sus partidas?'))return;PR=PR.filter(function(p){return p.id!==id;});sv();prVolver();}
+function prDetalle(id){
+ var p=prById(id);if(!p){prVolver();return;}
+ var el=document.getElementById('s-pres');var m2=(p.areas||[]).reduce(function(s,a){return s+prArea(a);},0);
+ el.innerHTML='<button class="back" onclick="prVolver()">‹ Volver a presupuestos</button><div class="card"><div class="ch">'+prEsc(p.tipo)+'</div><div class="pr-row"><b>'+prEsc(p.nombre)+'</b><button class="ib" onclick="prRenombrar()" title="Editar nombre">✏️</button></div><div class="pr-note">'+prEsc(p.fecha)+' · '+(p.areas||[]).length+' partidas · '+m2.toFixed(2)+' m² medidos</div><div class="pr-box"><div class="pr-small">COTIZACIÓN MANO DE OBRA</div><div class="pr-total">'+prF(prTot(p))+'</div><div class="pr-small">Solo mano de obra; no incluye materiales ni impuestos.</div></div></div>'+
+ '<div class="card"><div class="ch">Agregar partida / ambiente</div><div class="field"><label>Ambiente o área</label><input id="pr-amb" placeholder="Ej.: Pabellón A / Aula 101" maxlength="100"></div><div class="r2"><div class="field"><label>Superficie</label><select id="pr-super"><option value="paredes">Paredes</option><option value="techo">Techo</option><option value="piso">Piso</option></select></div><div class="field"><label>Tipo de pintura</label><select id="pr-pint" onchange="prSync()"><option value="mate">Mate</option><option value="satinado">Satinado</option></select></div></div><div class="r2"><div class="field"><label>Acabado</label><select id="pr-acab" onchange="prSync()"><option>A1</option><option selected>A2</option><option>A3</option></select></div><div class="field"><label>Tarifa S/ por m²</label><input type="number" step="0.01" min="0" id="pr-tarifa" value="17"></div></div><div class="r2"><div class="field"><label>Largo (m)</label><input type="number" id="pr-largo" min="0" step="0.01" placeholder="0"></div><div class="field"><label>Ancho (m)</label><input type="number" id="pr-ancho" min="0" step="0.01" placeholder="0"></div></div><div class="r2"><div class="field"><label>Altura paredes (m)</label><input type="number" id="pr-alto" min="0" step="0.01" placeholder="0"></div><div class="field"><label>Puertas/ventanas a descontar (m²)</label><input type="number" id="pr-huecos" min="0" step="0.01" placeholder="0"></div></div><div class="field"><label>Área manual (m²), opcional: reemplaza cálculo geométrico</label><input type="number" id="pr-manual" min="0" step="0.01" placeholder="Para paredes irregulares o metrado directo"></div><div class="pr-note">Paredes rectangulares = 2 × (largo + ancho) × altura − vanos. Techos y pisos = largo × ancho − vanos. También puedes ingresar directamente el metrado.</div><button class="btn bb" onclick="prAgregarArea()">+ Agregar partida</button></div>'+
+ '<div class="card"><div class="ch">Partidas de mano de obra</div>'+(p.areas.length?p.areas.map(function(a){return '<div class="pr-item"><div class="pr-row"><div><b>'+prEsc(a.nombre)+'</b><div class="pr-small">'+prEsc(a.tipo)+' · '+prEsc(a.pintura)+' '+prEsc(a.acabado)+' · '+prArea(a).toFixed(2)+' m² × '+prF(a.tarifa)+'</div></div><b>'+prF(prImporte(a))+'</b></div><div class="pr-actions"><button class="btn bk" onclick="prEditarArea(\''+a.id+'\')">Editar</button><button class="btn br" onclick="prBorrarArea(\''+a.id+'\')">Quitar</button></div></div>';}).join(''):'<div class="pr-note">Agrega el primer ambiente para calcular el metrado.</div>')+'</div>'+
+ '<div class="card"><div class="ch">Protección de pisos</div><div class="pr-note">En satinado se protege todo el piso; el cartón corrugado se puede añadir como refuerzo en zonas de alto tránsito. Ingresa el área real a cubrir.</div><div class="field"><label>Material</label><select id="pr-prot">'+PR_PROT.map(function(z){return '<option value="'+z.id+'">'+prEsc(z.n)+'</option>';}).join('')+'</select></div><div class="r2"><div class="field"><label>Área a proteger (m²)</label><input id="pr-protarea" type="number" min="0" step="0.01" placeholder="Ej.: 30"></div><div class="field"><label>Desperdicio (%)</label><input id="pr-protdes" type="number" min="0" step="1" value="0"></div></div><button class="btn bk" onclick="prAgregarProt()">+ Calcular rollos / piezas</button>'+
+ (p.protecciones||[]).map(function(z){var unidades=Math.ceil(prNum(z.m2)/(z.an*z.la));return '<div class="pr-item"><div class="pr-row"><div><b>'+prEsc(z.nombre)+'</b><div class="pr-small">'+z.m2.toFixed(2)+' m² · '+unidades+' unidades × '+prF(z.precio)+'</div></div><b>'+prF(unidades*z.precio)+'</b></div><button class="ib" onclick="prBorrarProt(\''+z.id+'\')">🗑</button></div>';}).join('')+'</div>'+
+ '<div class="card"><div class="ch">Otros materiales / gastos</div><div class="pr-note">Agrega cinta, pintura, sellador, empaste u otros materiales cuando conozcas cantidades y precios. No se inventan rendimientos.</div><div class="field"><label>Concepto</label><input id="pr-matnom" placeholder="Ej.: Cinta azul 3/4 (rollo)"></div><div class="r2"><div class="field"><label>Cantidad</label><input id="pr-matcant" type="number" min="0" step="0.01" placeholder="0"></div><div class="field"><label>Precio unitario S/</label><input id="pr-matprecio" type="number" min="0" step="0.01" placeholder="0"></div></div><button class="btn bk" onclick="prAgregarMat()">+ Agregar material</button>'+(p.materiales||[]).map(function(z){return '<div class="pr-item"><div class="pr-row"><div><b>'+prEsc(z.nombre)+'</b><div class="pr-small">'+z.cantidad+' × '+prF(z.precio)+'</div></div><b>'+prF(z.cantidad*z.precio)+'</b></div><button class="ib" onclick="prBorrarMat(\''+z.id+'\')">🗑</button></div>';}).join('')+'</div>'+
+ '<div class="card"><div class="ch">Resumen interno del presupuesto</div><div class="info-row"><span>Mano de obra</span><b>'+prF(prTot(p))+'</b></div><div class="info-row"><span>Protección de pisos</span><b>'+prF(prProtecTot(p))+'</b></div><div class="info-row"><span>Otros materiales</span><b>'+prF(prMatTot(p))+'</b></div><div class="pr-box"><div class="pr-row"><b>Total referencial</b><b>'+prF(prTot(p)+prProtecTot(p)+prMatTot(p))+'</b></div></div><div class="pr-note">El monto de mano de obra es una cotización, no una utilidad neta. Los materiales son estimaciones de compra, sin considerar sobrantes ni mano de obra adicional para protección.</div><button class="btn bteal" onclick="prExportar()">📄 Descargar presupuesto CSV</button><button class="btn bk" onclick="window.print()">🖨 Imprimir vista</button></div>';
+}
+function prSync(){var p=document.getElementById('pr-pint').value,a=document.getElementById('pr-acab');if(p==='satinado'&&a.value==='A3'){a.value='A2';toast('Satinado requiere A1 o A2');}Array.from(a.options).forEach(function(o){o.disabled=p==='satinado'&&o.value==='A3';});document.getElementById('pr-tarifa').value=PR_TARIFAS[p][a.value];}
+function prV(id){return document.getElementById(id).value;}
+function prAgregarArea(){var p=prById(PR_ACT),nombre=prV('pr-amb').trim(),pint=prV('pr-pint'),acab=prV('pr-acab'),tar=Number(prV('pr-tarifa'));if(!nombre){alert('Ingresa un ambiente');return;}if(!Number.isFinite(tar)||tar<0){alert('Tarifa inválida');return;}var a={id:prId(),nombre:nombre,tipo:prV('pr-super'),pintura:pint,acabado:acab,tarifa:tar,largo:prNum(prV('pr-largo')),ancho:prNum(prV('pr-ancho')),alto:prNum(prV('pr-alto')),huecos:prNum(prV('pr-huecos')),manual:prV('pr-manual')===''?null:prNum(prV('pr-manual'))};if(pint==='satinado'&&acab==='A3'){alert('No se permite satinado A3');return;}if(prArea(a)<=0){alert('Ingresa medidas o un metrado manual mayor que cero');return;}p.areas.push(a);sv();prDetalle(PR_ACT);toast('✓ Partida agregada');}
+function prEditarArea(id){var p=prById(PR_ACT),a=p.areas.find(function(x){return x.id===id;});if(!a)return;var n=prompt('Nombre del ambiente',a.nombre);if(n===null)return;n=n.trim();if(!n)return;var met=prompt('Área neta en m² (modifica el metrado manual)',prArea(a).toFixed(2));if(met===null)return;var m=Number(met);if(!Number.isFinite(m)||m<=0){alert('Área inválida');return;}var tar=prompt('Tarifa de mano de obra S/ por m²',a.tarifa);if(tar===null)return;var t=Number(tar);if(!Number.isFinite(t)||t<0){alert('Tarifa inválida');return;}a.nombre=n;a.manual=m;a.tarifa=t;sv();prDetalle(PR_ACT);}
+function prBorrarArea(id){if(!confirm('¿Quitar esta partida?'))return;var p=prById(PR_ACT);p.areas=p.areas.filter(function(a){return a.id!==id;});sv();prDetalle(PR_ACT);}
+function prRenombrar(){var p=prById(PR_ACT),n=prompt('Nombre del proyecto',p.nombre);if(n&&n.trim()){p.nombre=n.trim();sv();prDetalle(PR_ACT);}}
+function prAgregarProt(){var p=prById(PR_ACT),z=PR_PROT.find(function(x){return x.id===prV('pr-prot');}),area=Number(prV('pr-protarea')),d=Number(prV('pr-protdes'));if(!Number.isFinite(area)||area<=0||!Number.isFinite(d)||d<0){alert('Área o desperdicio inválido');return;}p.protecciones.push({id:prId(),nombre:z.n,an:z.an,la:z.la,precio:z.precio,m2:area*(1+d/100)});sv();prDetalle(PR_ACT);}
+function prBorrarProt(id){var p=prById(PR_ACT);p.protecciones=p.protecciones.filter(function(z){return z.id!==id;});sv();prDetalle(PR_ACT);}
+function prAgregarMat(){var p=prById(PR_ACT),n=prV('pr-matnom').trim(),c=Number(prV('pr-matcant')),v=Number(prV('pr-matprecio'));if(!n||!Number.isFinite(c)||c<=0||!Number.isFinite(v)||v<0){alert('Completa concepto, cantidad y precio válidos');return;}p.materiales.push({id:prId(),nombre:n,cantidad:c,precio:v});sv();prDetalle(PR_ACT);}
+function prBorrarMat(id){var p=prById(PR_ACT);p.materiales=p.materiales.filter(function(z){return z.id!==id;});sv();prDetalle(PR_ACT);}
+function prExportar(){var p=prById(PR_ACT),rows=[['Proyecto',p.nombre],['Tipo',p.tipo],['Fecha',p.fecha],[],['Ambiente','Superficie','Pintura','Acabado','Área m2','Tarifa S/m2','Importe S']];p.areas.forEach(function(a){rows.push([a.nombre,a.tipo,a.pintura,a.acabado,prArea(a).toFixed(2),a.tarifa.toFixed(2),prImporte(a).toFixed(2)]);});rows.push([],['MANO DE OBRA','','','','','',prTot(p).toFixed(2)],[],['Protección','m2 efectivos','Unidades','Precio unidad','Subtotal']);p.protecciones.forEach(function(z){var u=Math.ceil(z.m2/(z.an*z.la));rows.push([z.nombre,z.m2.toFixed(2),u,z.precio.toFixed(2),(u*z.precio).toFixed(2)]);});rows.push([],['Otros materiales','Cantidad','Precio unitario','Subtotal']);p.materiales.forEach(function(z){rows.push([z.nombre,z.cantidad,z.precio.toFixed(2),(z.cantidad*z.precio).toFixed(2)]);});rows.push([],['TOTAL REFERENCIAL', (prTot(p)+prProtecTot(p)+prMatTot(p)).toFixed(2)]);var csv='\ufeff'+rows.map(function(r){return r.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}).join(';');}).join('\r\n');var b=new Blob([csv],{type:'text/csv;charset=utf-8;'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='presupuesto-'+p.nombre.replace(/[^a-z0-9_-]/gi,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},1000);}
+
 rRes();
 </script>
 </body>
